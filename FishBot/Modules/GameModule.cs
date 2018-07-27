@@ -15,6 +15,8 @@ namespace FishBot.Modules
         public static Dictionary<string, IUser> AuthorUsers = new Dictionary<string, IUser>();
         public static string PlayerTurn;
 
+        public static bool GameInProgress = false;
+
         public static int RedScore;
         public static int BlueScore;
 
@@ -36,6 +38,7 @@ namespace FishBot.Modules
         [Summary("Starts the game!")]
         public async Task Start()
         {
+            GameInProgress = true;
             if (TeamModule.RedTeam.Count != TeamModule.BlueTeam.Count)
             {
                 await ReplyAsync($"Teams are not even! Check teams using the \".team list\" command");
@@ -61,6 +64,12 @@ namespace FishBot.Modules
         [Summary("Allows a player to call a card from another")]
         public async Task Call(string target, string requestedCard)
         {
+            if (!GameInProgress)
+            {
+                await ReplyAsync($"Game is not in progress yet!");
+                return;
+            }
+            
             // delete previous call info
             var rawMessages = Context.Channel.GetMessagesAsync().FlattenAsync();
             foreach (var msg in rawMessages.Result)

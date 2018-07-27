@@ -15,7 +15,7 @@ namespace FishBot
 
         private AuditLog _auditLog;
 
-        private static void Main(string[] args)
+        private static void Main()
             => new Program().MainAsync().GetAwaiter().GetResult();
 
         /// <summary>
