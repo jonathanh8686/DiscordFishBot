@@ -18,6 +18,12 @@ namespace FishBot.Modules
         [Summary("Adds a player to red team or blue team")]
         public async Task Add(string username, string teamname)
         {
+            if (GameModule.GameInProgress)
+            {
+                await ReplyAsync($"Game is in progress; Teams are locked in!");
+                return;
+            }
+
             teamname = teamname.ToLower();
 
             if (teamname != "red" && teamname != "blue")
@@ -27,15 +33,15 @@ namespace FishBot.Modules
             }
 
             if (TeamDict.ContainsKey(username))
-                await ReplyAsync($"{username} is already in a team! They are in {TeamDict[username]}");
+                await ReplyAsync($"`{username}` is already in a team! They are in `{TeamDict[username]}`");
             else
             {
                 TeamDict.Add(username, teamname);
-                if(teamname == "red") RedTeam.Add(username);
-                else if(teamname == "blue") BlueTeam.Add(username);
+                if (teamname == "red") RedTeam.Add(username);
+                else if (teamname == "blue") BlueTeam.Add(username);
                 GameModule.Players.Add(username);
 
-                await ReplyAsync($"Added {username} to {teamname}");
+                await ReplyAsync($"Added `{username}` to `{teamname}`");
             }
         }
 
@@ -43,8 +49,14 @@ namespace FishBot.Modules
         [Summary("Removes a player from team")]
         public async Task Remove(string username)
         {
+            if (GameModule.GameInProgress)
+            {
+                await ReplyAsync($"Game is in progress; Teams are locked in!");
+                return;
+            }
+
             if (!TeamDict.ContainsKey(username))
-                await ReplyAsync($"{username} is not already on a team! Add them onto a team using \"-team add USERNAME\"");
+                await ReplyAsync($"`{username}` is not already on a team! Add them onto a team using \"-team add USERNAME\"");
             else
             {
                 string prevTeam = TeamDict[username];
@@ -53,7 +65,7 @@ namespace FishBot.Modules
                 if (RedTeam.Contains(username)) RedTeam.Remove(username);
                 else if (BlueTeam.Contains(username)) BlueTeam.Remove(username);
 
-                await ReplyAsync($"Removed {username} from {prevTeam}");
+                await ReplyAsync($"Removed `{username}` from `{prevTeam}`");
             }
         }
 

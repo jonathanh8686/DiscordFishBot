@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -15,7 +16,7 @@ namespace FishBot.Modules
         public static Dictionary<string, IUser> AuthorUsers = new Dictionary<string, IUser>();
         public static string PlayerTurn;
 
-        public static bool GameInProgress = false;
+        public static bool GameInProgress;
 
         public static int RedScore;
         public static int BlueScore;
@@ -25,19 +26,37 @@ namespace FishBot.Modules
         [Summary("Claim a username in the game")]
         public async Task Claim(string username)
         {
+            if (GameInProgress)
+            {
+                await ReplyAsync("Game is already in progess!");
+                return;
+            }
+
+            if (AuthorUsers.Values.Contains(Context.User))
+            {
+                await ReplyAsync($"`{Context.User.Username}` has already claimed a username!");
+                return;
+            }
+
             if (!AuthorUsers.ContainsKey(username))
             {
                 AuthorUsers.Add(username, Context.User);
-                await ReplyAsync($"{username} is now assigned to {AuthorUsers[username]}");
+                await ReplyAsync($"`{username}` is now assigned to `{AuthorUsers[username]}`");
             }
             else
-                await ReplyAsync($"{username} is already assigned to {AuthorUsers[username]}");
+                await ReplyAsync($"`{username}` is already assigned to `{AuthorUsers[username]}`");
         }
 
         [Command("start")]
         [Summary("Starts the game!")]
         public async Task Start()
         {
+            if (GameInProgress)
+            {
+                await ReplyAsync("Game is already in progess!");
+                return;
+            }
+
             GameInProgress = true;
             if (TeamModule.RedTeam.Count != TeamModule.BlueTeam.Count)
             {
@@ -52,12 +71,12 @@ namespace FishBot.Modules
                 return;
             }
 
-            await ReplyAsync("Starting Game...");
+            await ReplyAsync("`Starting Game...`");
             PlayerTurn = Players[new Random().Next(Players.Count)];
 
             GameStart = true;
             await CardDealer.DealCards();
-            await ReplyAsync($"It's {PlayerTurn}'s turn!");
+            await ReplyAsync($"It's `{PlayerTurn}`'s turn!");
         }
 
         [Command("call")]
@@ -81,13 +100,13 @@ namespace FishBot.Modules
             var req = CardDealer.GetCardByName(requestedCard);
             if (!Players.Contains(target))
             {
-                await ReplyAsync($"{target} is not a player!");
+                await ReplyAsync($"`{target}` is not a player!");
                 return;
             }
 
             if(!CardDealer.CardNames.Contains(requestedCard))
             {
-                await ReplyAsync($"{requestedCard} is not a valid card!");
+                await ReplyAsync($"`{requestedCard}` is not a valid card!");
                 return;
             }
 
@@ -113,7 +132,7 @@ namespace FishBot.Modules
                 builder.Color = Color.Red;
                 builder.Description = "ILLEGAL CALL!";
 
-                builder.AddField("Info", $"{PlayerTurn} called the {requestedCard} from {target} but it was illegal! It is now {target}'s turn.");
+                builder.AddField("Info", $"`{PlayerTurn}` called the `{requestedCard}` from `{target}` but it was **illegal**! It is now `{target}`'s turn.");
                 PlayerTurn = target;
                 await ReplyAsync("*TEMPORARY*", false, builder.Build());
 
@@ -125,8 +144,10 @@ namespace FishBot.Modules
                 // hit
                 builder.Color = Color.Green;
                 builder.Description = "Call was a hit!";
+                builder.ThumbnailUrl =
+                    "https://raw.githubusercontent.com/jonathanh8686/DiscordFishBot/master/FishBot/cards/hit.png";
 
-                builder.AddField("Info", $"{PlayerTurn} called the {requestedCard} from {target} and it was a hit! It is now {PlayerTurn}'s turn.");
+                builder.AddField("Info", $"`{PlayerTurn}` called the `{requestedCard}` from `{target}` and it was a **hit**! It is now `{PlayerTurn}`'s turn.");
 
                 PlayerCards[target].Remove(req);
                 PlayerCards[PlayerTurn].Add(req);
@@ -137,23 +158,29 @@ namespace FishBot.Modules
                 // miss
                 builder.Color = Color.Red;
                 builder.Description = "Call was a miss!";
+                builder.ThumbnailUrl =
+                    "https://raw.githubusercontent.com/jonathanh8686/DiscordFishBot/master/FishBot/cards/miss.png";
 
-                builder.AddField("Info", $"{PlayerTurn} called the {requestedCard} from {target} and it was a miss! It is now {target}'s turn.");
-
+                builder.AddField("Info", $"`{PlayerTurn}` called the `{requestedCard}` from `{target}` and it was a **miss**! It is now `{target}`'s turn.");
                 PlayerTurn = target;
-                await ReplyAsync($"It is now {PlayerTurn}'s turn!");
             }
 
             await ReplyAsync("*TEMPORARY*", false, builder.Build());
 
-
+            await Context.Message.DeleteAsync();
             await CardDealer.SendCards();
         }
 
-        [Command("calHalfSuit")]
+        [Command("callHS")]
         [Summary("Allows a player to call a halfsuit for their team")]
         public async Task CallHalfSuit(string halfsuit, string callstring)
         {
+            if (!GameInProgress)
+            {
+                await ReplyAsync($"Game is not in progress yet!");
+                return;
+            }
+
             var seperatedCallString = callstring.Split(" ");
             var claimedCards = new List<string>();
             string cuser = "";
@@ -204,19 +231,45 @@ namespace FishBot.Modules
             if (works)
             {
                 builder.Color = Color.Green;
-                builder.Description = $"{username} hit the {halfsuit}!";
+                builder.Description = $"`{username}` **hit** the `{halfsuit}`!";
                 if (team == "red") RedScore++;
                 else BlueScore++;
             }
             else
             {
                 builder.Color = Color.Red;
-                builder.Description = $"{username} missed the {halfsuit}!";
+                builder.Description = $"`{username}` **missed** the `{halfsuit}`!";
                 if (team == "red") BlueScore++;
                 else RedScore++;
             }
             builder.AddField("Score Update", $"Blue Team: {BlueScore}\n Red Team: {RedScore}");
 
+            await ReplyAsync("", false, builder.Build());
+
+            if (RedScore + BlueScore >= 9)
+            {
+                GameInProgress = false;
+                await DeclareResult();
+            }
+        }
+
+        private async Task DeclareResult()
+        {
+            var builder = new EmbedBuilder();
+            builder.Title = "Game Result!";
+
+            if (RedScore > BlueScore)
+            {
+                builder.Color = Color.Red;
+                builder.Description = "Red team wins!";
+            }
+            else
+            {
+                builder.Color = Color.Blue;
+                builder.Description = "Blue team wins!";
+            }
+
+            builder.AddField("Final Scores", $"Blue Team: {BlueScore}\n Red Team: {RedScore}");
             await ReplyAsync("", false, builder.Build());
         }
     }

@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
+using Discord.Net;
 using FishBot.Modules;
 
 namespace FishBot
@@ -75,8 +76,16 @@ namespace FishBot
                 var dmMessages = dmChannel.GetMessagesAsync().FlattenAsync();
                 foreach (var msg in dmMessages.Result)
                 {
-                    if (msg.Content.Contains("*TEMPORARY*")) // maybe make this less hacky
-                        await msg.DeleteAsync();
+                    try
+                    {
+                        if (msg.Content.Contains("*TEMPORARY*")) // maybe make this less hacky
+                            await msg.DeleteAsync();
+                    }
+                    catch (HttpException)
+                    {
+                        await Program.Log(new LogMessage(LogSeverity.Error, "CardDealer",
+                            "HTTP Error when deleting hand information"));
+                    }
                 }
 
                 builder = new EmbedBuilder();
