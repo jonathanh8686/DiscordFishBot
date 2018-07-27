@@ -15,7 +15,7 @@ namespace FishBot
 
         private AuditLog _auditLog;
 
-        static void Main(string[] args)
+        private static void Main(string[] args)
             => new Program().MainAsync().GetAwaiter().GetResult();
 
         /// <summary>
@@ -135,7 +135,7 @@ namespace FishBot
             var pattern = begin + ".*?" + end;
             pattern = pattern.Replace("(", "\\(");
             var matches = Regex.Matches(data, pattern);
-            return (from Match nextOne in matches select nextOne.Value.ToString() into strTemp select GetMiddle(strTemp, begin, end).Replace("&amp; ", "")).ToList();
+            return (from Match nextOne in matches select nextOne.Value into strTemp select GetMiddle(strTemp, begin, end).Replace("&amp; ", "")).ToList();
         }
         public static string StripHTML(string htmlString)
         {

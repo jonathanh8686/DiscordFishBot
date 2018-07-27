@@ -71,12 +71,19 @@ namespace FishBot
             EmbedBuilder builder;
             foreach (var user in GameModule.AuthorUsers)
             {
+                var dmChannel = await user.Value.GetOrCreateDMChannelAsync();
+                var dmMessages = dmChannel.GetMessagesAsync().FlattenAsync();
+                foreach (var msg in dmMessages.Result)
+                {
+                    if (msg.Content.Contains("*TEMPORARY*")) // maybe make this less hacky
+                        await msg.DeleteAsync();
+                }
+
                 builder = new EmbedBuilder();
+                builder.Title = $"{user.Key}'s hand";
                 string halfSuitCards = "\n";
                 for (int i = 0; i < CardNames.Count; i++)
                 {
-                    //int cardID = CardNames.IndexOf(GameModule.PlayerCards[user.Key][i].CardName);
-
                     if (i % 6 == 0 && i != 0)
                     {
                         if (halfSuitCards == "\n") continue;
@@ -126,7 +133,7 @@ namespace FishBot
                     }
 
                 }
-                await user.Value.SendMessageAsync("", false, builder.Build());
+                await user.Value.SendMessageAsync("*TEMPORARY*", false, builder.Build());
             }
         }
 
