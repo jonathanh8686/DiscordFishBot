@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
+using FishBot.Modules;
 
 namespace FishBot
 {
@@ -14,6 +15,7 @@ namespace FishBot
         private CommandHandler _cmdHandler;
 
         private AuditLog _auditLog;
+        public static Dictionary<IGuild, DataStorage> variables = new Dictionary<IGuild, DataStorage>();
 
         private static void Main()
             => new Program().MainAsync().GetAwaiter().GetResult();
@@ -40,6 +42,7 @@ namespace FishBot
             });
 
             _client.Log += Log;
+            _client.GuildAvailable += GuildAvailable;
 
             _auditLog = new AuditLog();
             _auditLog.Mount(_client);
@@ -51,7 +54,13 @@ namespace FishBot
             // Inserts commands into bot
 
             await Login(botdata);
+
             await Task.Delay(-1);
+        }
+
+        private async Task GuildAvailable(SocketGuild g)
+        {
+            variables.Add(g, new DataStorage());
         }
 
         /// <summary>
@@ -142,7 +151,7 @@ namespace FishBot
             htmlString = htmlString.Replace("\r", "");
             htmlString = htmlString.Replace("\n", "");
             htmlString = htmlString.Replace("\\", "");
-            return Regex.Replace(htmlString, @"<(.|\n)*?>", string.Empty);
+            return Regex.Replace(htmlString, @"<(.|\n)*?>", String.Empty);
         }
     }
 }

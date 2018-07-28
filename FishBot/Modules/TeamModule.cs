@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
+using static FishBot.Program;
 
 namespace FishBot.Modules
 {
@@ -10,15 +10,12 @@ namespace FishBot.Modules
     [Group("team")]
     public class TeamModule : ModuleBase
     {
-        public static Dictionary<string, string> TeamDict = new Dictionary<string, string>();
-        public static List<string> RedTeam = new List<string>();
-        public static List<string> BlueTeam = new List<string>();
 
         [Command("add")]
         [Summary("Adds a player to red team or blue team")]
         public async Task Add(string username, string teamname)
         {
-            if (GameModule.GameInProgress)
+            if (variables[Context.Guild].GameInProgress)
             {
                 await ReplyAsync($"Game is in progress; Teams are locked in!");
                 return;
@@ -32,14 +29,14 @@ namespace FishBot.Modules
                 return;
             }
 
-            if (TeamDict.ContainsKey(username))
-                await ReplyAsync($"`{username}` is already in a team! They are in `{TeamDict[username]}`");
+            if (variables[Context.Guild].TeamDict.ContainsKey(username))
+                await ReplyAsync($"`{username}` is already in a team! They are in `{variables[Context.Guild].TeamDict[username]}`");
             else
             {
-                TeamDict.Add(username, teamname);
-                if (teamname == "red") RedTeam.Add(username);
-                else if (teamname == "blue") BlueTeam.Add(username);
-                GameModule.Players.Add(username);
+                variables[Context.Guild].TeamDict.Add(username, teamname);
+                if (teamname == "red") variables[Context.Guild].RedTeam.Add(username);
+                else if (teamname == "blue") variables[Context.Guild].BlueTeam.Add(username);
+                variables[Context.Guild].Players.Add(username);
 
                 await ReplyAsync($"Added `{username}` to `{teamname}`");
             }
@@ -49,21 +46,21 @@ namespace FishBot.Modules
         [Summary("Removes a player from team")]
         public async Task Remove(string username)
         {
-            if (GameModule.GameInProgress)
+            if (variables[Context.Guild].GameInProgress)
             {
                 await ReplyAsync($"Game is in progress; Teams are locked in!");
                 return;
             }
 
-            if (!TeamDict.ContainsKey(username))
+            if (!variables[Context.Guild].TeamDict.ContainsKey(username))
                 await ReplyAsync($"`{username}` is not already on a team! Add them onto a team using \"-team add USERNAME\"");
             else
             {
-                string prevTeam = TeamDict[username];
-                TeamDict.Remove(username);
+                string prevTeam = variables[Context.Guild].TeamDict[username];
+                variables[Context.Guild].TeamDict.Remove(username);
 
-                if (RedTeam.Contains(username)) RedTeam.Remove(username);
-                else if (BlueTeam.Contains(username)) BlueTeam.Remove(username);
+                if (variables[Context.Guild].RedTeam.Contains(username)) variables[Context.Guild].RedTeam.Remove(username);
+                else if (variables[Context.Guild].BlueTeam.Contains(username)) variables[Context.Guild].BlueTeam.Remove(username);
 
                 await ReplyAsync($"Removed `{username}` from `{prevTeam}`");
             }
@@ -84,15 +81,16 @@ namespace FishBot.Modules
                 return;
             }
 
-            if (teamname == "red")
+            switch (teamname)
             {
-                teamColor = Color.Red;
-                teamString = "Red Team";
-            }
-            else if (teamname == "blue")
-            {
-                teamColor = Color.Blue;
-                teamString = "Blue Team";
+                case "red":
+                    teamColor = Color.Red;
+                    teamString = "Red Team";
+                    break;
+                case "blue":
+                    teamColor = Color.Blue;
+                    teamString = "Blue Team";
+                    break;
             }
 
             var builder = new EmbedBuilder()
@@ -100,11 +98,13 @@ namespace FishBot.Modules
                 Color = teamColor,
             };
 
-            var players = TeamDict.Where(x => x.Value == teamname).ToList();
+            var players = variables[Context.Guild].TeamDict.Where(x => x.Value == teamname).ToList();
             string output = players.Aggregate("", (current, t) => current + (t.Key + "\n"));
 
-            builder.AddField(teamString, output, true);
-
+            if (output != "")
+                builder.AddField(teamString, output, true);
+            else
+                await ReplyAsync($"There are no players on `{teamname}`");
             await ReplyAsync("", false, builder.Build());
         }
 
