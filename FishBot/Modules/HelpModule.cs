@@ -21,7 +21,7 @@ namespace FishBot.Modules
         public async Task HelpAsync()
         {
             string prefix = Config.Load().BotPrefix;
-            var builder = new EmbedBuilder()
+            var builder = new EmbedBuilder
             {
                 Color = new Color(114, 137, 218),
                 Description = "These are the commands you can use"
@@ -41,14 +41,12 @@ namespace FishBot.Modules
                 }
 
                 if (!string.IsNullOrWhiteSpace(description))
-                {
                     builder.AddField(x =>
                     {
                         x.Name = module.Name;
                         x.Value = description;
                         x.IsInline = false;
                     });
-                }
             }
 
             await ReplyAsync("", false, builder.Build());
@@ -65,7 +63,7 @@ namespace FishBot.Modules
                 return;
             }
 
-            var builder = new EmbedBuilder()
+            var builder = new EmbedBuilder
             {
                 Color = new Color(114, 137, 218),
                 Description = $"Here are some commands like **{command}**"
@@ -96,7 +94,7 @@ namespace FishBot.Modules
                              $"However, the bot still needs to know what your actual discord account is so it can DM you your hand.\n\n" +
                              $"So the **Second step is to claim a username, using the `.claim [nickname]` command**.\n This will link" +
                              $" your discord account to the nickname. *Note that the nicknames are ALWAYS case-sensitive*\n\n" +
-                             $"Finally, once everyone is linked to an account, **use the `.start` command to begin the game!**\n");
+                             $"Finally, once everyone is linked to an account, **use the `.start` command to begin the game!**\n\n");
 
             await ReplyAsync($"Once in game, there are two commands that you need to know\n" +
                              $"The `.call [username] [card]` is the most important command for this game. To use this command, follow " +
@@ -112,7 +110,6 @@ namespace FishBot.Modules
                              $"think your teammate (\"feedingretard\") has the `9S, QS, and JS` calling the `S+` looks like: `.callhs S+" +
                              $" \"optimalplayer AS KS 10S feedingretard 9S QS JS\"` *Note that the callString MUST be surrounded by quotation marks" +
                              $" and that everything in this case is case-sensitive*");
-            return;
         }
     }
 }

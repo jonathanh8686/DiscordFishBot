@@ -5,23 +5,24 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
-using FishBot.Modules;
 
 namespace FishBot
 {
-    class Program
+    internal class Program
     {
+        public static Dictionary<IGuild, DataStorage> variables = new Dictionary<IGuild, DataStorage>();
+
+        private AuditLog _auditLog;
         private DiscordSocketClient _client;
         private CommandHandler _cmdHandler;
 
-        private AuditLog _auditLog;
-        public static Dictionary<IGuild, DataStorage> variables = new Dictionary<IGuild, DataStorage>();
-
         private static void Main()
-            => new Program().MainAsync().GetAwaiter().GetResult();
+        {
+            new Program().MainAsync().GetAwaiter().GetResult();
+        }
 
         /// <summary>
-        /// Main problem start
+        ///     Main problem start
         /// </summary>
         /// <returns></returns>
         public async Task MainAsync()
@@ -38,7 +39,7 @@ namespace FishBot
             _client = new DiscordSocketClient(new DiscordSocketConfig
             {
                 LogLevel = LogSeverity.Verbose,
-                MessageCacheSize = 2000,
+                MessageCacheSize = 2000
             });
 
             _client.Log += Log;
@@ -58,13 +59,14 @@ namespace FishBot
             await Task.Delay(-1);
         }
 
-        private async Task GuildAvailable(SocketGuild g)
+        private async Task
+            GuildAvailable(SocketGuild g)
         {
             variables.Add(g, new DataStorage());
         }
 
         /// <summary>
-        /// Login and Connect to the Discord
+        ///     Login and Connect to the Discord
         /// </summary>
         /// <param name="botdata">Config class containing data about the bot</param>
         private async Task Login(Config botdata)
@@ -86,7 +88,7 @@ namespace FishBot
         }
 
         /// <summary>
-        /// Logs data to the Console
+        ///     Logs data to the Console
         /// </summary>
         /// <param name="msg">LogMessage object to describe log data</param>
         public static Task Log(LogMessage msg)
@@ -117,7 +119,7 @@ namespace FishBot
         }
 
         /// <summary>
-        /// Simple print data to Console
+        ///     Simple print data to Console
         /// </summary>
         /// <param name="msg">String to print to the Console</param>
         /// <param name="color">Color of print</param>
@@ -130,28 +132,33 @@ namespace FishBot
 
         public static string GetMiddle(string data, string begin, string end)
         {
-            var beginPosition = data.IndexOf(begin, StringComparison.Ordinal);
+            int beginPosition = data.IndexOf(begin, StringComparison.Ordinal);
             if (beginPosition < 0) return "";
-            var valueEnd = data.IndexOf(end, beginPosition + begin.Length, StringComparison.Ordinal);
+            int valueEnd = data.IndexOf(end, beginPosition + begin.Length, StringComparison.Ordinal);
             if (valueEnd > beginPosition + begin.Length)
                 return data.Substring(beginPosition + begin.Length, valueEnd - beginPosition + begin.Length).Trim();
             return "";
         }
+
         public static List<string> GetMiddleList(string data, string begin, string end)
         {
             data = data.Replace("\n", "");
             data = data.Replace("\r", "");
-            var pattern = begin + ".*?" + end;
+            string pattern = begin + ".*?" + end;
             pattern = pattern.Replace("(", "\\(");
             var matches = Regex.Matches(data, pattern);
-            return (from Match nextOne in matches select nextOne.Value into strTemp select GetMiddle(strTemp, begin, end).Replace("&amp; ", "")).ToList();
+            return (from Match nextOne in matches
+                select nextOne.Value
+                into strTemp
+                select GetMiddle(strTemp, begin, end).Replace("&amp; ", "")).ToList();
         }
+
         public static string StripHTML(string htmlString)
         {
             htmlString = htmlString.Replace("\r", "");
             htmlString = htmlString.Replace("\n", "");
             htmlString = htmlString.Replace("\\", "");
-            return Regex.Replace(htmlString, @"<(.|\n)*?>", String.Empty);
+            return Regex.Replace(htmlString, @"<(.|\n)*?>", string.Empty);
         }
     }
 }

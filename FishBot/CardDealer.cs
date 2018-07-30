@@ -12,16 +12,13 @@ namespace FishBot
     public class Card
     {
         public string CardName;
-        public Image CardImage;
     }
 
     public static class CardDealer
     {
-        private static readonly string[] WordMap = { "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"};
+        private static readonly string[] WordMap =
+            {"zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"};
 
-        public static string CardsAssetPath { get; } = "assets/cards";
-        public static string CardNameAssetPath { get; } = "assets/CardNames.txt";
-        public static string HalfSuitNameAssetPath { get; } = "assets/HalfSuitNames.txt";
         public static List<string> CardNames;
         public static List<string> HalfSuitNames;
 
@@ -38,10 +35,12 @@ namespace FishBot
             foreach (string name in CardNames)
             {
                 var c = new Card {CardName = name};
-                c.CardImage = new Image($"{CardsAssetPath}/{c.CardName}.png");
                 Cards.Add(c.CardName, c);
             }
         }
+
+        public static string CardNameAssetPath { get; } = "assets/CardNames.txt";
+        public static string HalfSuitNameAssetPath { get; } = "assets/HalfSuitNames.txt";
 
         public static async Task DealCards(IGuild cguild)
         {
@@ -56,7 +55,8 @@ namespace FishBot
                 string playerName = variables[cguild].Players[playerNameIndex];
 
                 int givenCardIndex = new Random().Next(remainingCards.Count);
-                variables[cguild].PlayerCards[playerName].Add(GetCardByName(remainingCards[givenCardIndex])); // lol what
+                variables[cguild].PlayerCards[playerName]
+                    .Add(GetCardByName(remainingCards[givenCardIndex])); // lol what
 
                 remainingCards.RemoveAt(givenCardIndex);
                 playerDeal++;
@@ -72,7 +72,6 @@ namespace FishBot
                 var dmChannel = await user.Value.GetOrCreateDMChannelAsync();
                 var dmMessages = dmChannel.GetMessagesAsync().FlattenAsync();
                 foreach (var msg in dmMessages.Result)
-                {
                     try
                     {
                         if (msg.Content.Contains("*TEMPORARY*")) // maybe make this less hacky
@@ -83,18 +82,17 @@ namespace FishBot
                         await Log(new LogMessage(LogSeverity.Error, "CardDealer",
                             "HTTP Error when deleting hand information"));
                     }
-                }
 
                 var builder = new EmbedBuilder {Title = $"{user.Key}'s hand"};
                 var halfSuitCards = "\n";
                 for (var i = 0; i < CardNames.Count; i++)
                 {
                     if (i % 6 == 0 && i != 0)
-                    {
-                        if (halfSuitCards == "\n") continue;
-                        builder.AddField(HalfSuitNames[(i / 6) - 1], halfSuitCards);
-                        halfSuitCards = "\n";
-                    }
+                        if (halfSuitCards != "\n")
+                        {
+                            builder.AddField(HalfSuitNames[i / 6 - 1], halfSuitCards);
+                            halfSuitCards = "\n";
+                        }
 
                     if (!variables[cguild].PlayerCards[user.Key].Contains(Cards[CardNames[i]])) continue;
                     var cardNameOutput = "";
@@ -114,7 +112,7 @@ namespace FishBot
 
                     if (CardNames[i].EndsWith("S"))
                         cardNameOutput += "\u2660";
-                    else if(CardNames[i].EndsWith("C"))
+                    else if (CardNames[i].EndsWith("C"))
                         cardNameOutput += "\u2663";
                     else if (CardNames[i].EndsWith("D"))
                         cardNameOutput += "\u2666";
@@ -126,10 +124,9 @@ namespace FishBot
                     else if (CardNames[i] == "J-")
                         cardNameOutput = ":black_joker::heavy_minus_sign:";
                     halfSuitCards += cardNameOutput + "\n";
-
                 }
 
-                if(halfSuitCards != "\n")
+                if (halfSuitCards != "\n")
                     builder.AddField(HalfSuitNames[8], halfSuitCards);
 
                 await user.Value.SendMessageAsync("*TEMPORARY*", false, builder.Build());

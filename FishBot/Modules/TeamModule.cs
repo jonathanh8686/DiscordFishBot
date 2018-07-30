@@ -10,12 +10,18 @@ namespace FishBot.Modules
     [Group("team")]
     public class TeamModule : ModuleBase
     {
-
         [Command("add")]
         [Summary("Adds a player to red team or blue team")]
         public async Task Add(string username, string teamname)
         {
-            if (variables[Context.Guild].GameInProgress)
+            if (CardDealer.CardNames.Contains(username) || username.Contains(" ")
+            ) // make sure nobody sets their username to be a card
+            {
+                await ReplyAsync($"Can't set {username} as your username");
+                return;
+            }
+
+            if (variables[Context.Guild].GameInProgress) // make sure once game in the progress, teams can't change
             {
                 await ReplyAsync($"Game is in progress; Teams are locked in!");
                 return;
@@ -30,7 +36,10 @@ namespace FishBot.Modules
             }
 
             if (variables[Context.Guild].TeamDict.ContainsKey(username))
-                await ReplyAsync($"`{username}` is already in a team! They are in `{variables[Context.Guild].TeamDict[username]}`");
+            {
+                await ReplyAsync(
+                    $"`{username}` is already in a team! They are in `{variables[Context.Guild].TeamDict[username]}`");
+            }
             else
             {
                 variables[Context.Guild].TeamDict.Add(username, teamname);
@@ -41,6 +50,7 @@ namespace FishBot.Modules
                 await ReplyAsync($"Added `{username}` to `{teamname}`");
             }
         }
+
 
         [Command("remove")]
         [Summary("Removes a player from team")]
@@ -53,14 +63,19 @@ namespace FishBot.Modules
             }
 
             if (!variables[Context.Guild].TeamDict.ContainsKey(username))
-                await ReplyAsync($"`{username}` is not already on a team! Add them onto a team using \"-team add USERNAME\"");
+            {
+                await ReplyAsync(
+                    $"`{username}` is not already on a team! Add them onto a team using \"-team add USERNAME\"");
+            }
             else
             {
                 string prevTeam = variables[Context.Guild].TeamDict[username];
                 variables[Context.Guild].TeamDict.Remove(username);
 
-                if (variables[Context.Guild].RedTeam.Contains(username)) variables[Context.Guild].RedTeam.Remove(username);
-                else if (variables[Context.Guild].BlueTeam.Contains(username)) variables[Context.Guild].BlueTeam.Remove(username);
+                if (variables[Context.Guild].RedTeam.Contains(username))
+                    variables[Context.Guild].RedTeam.Remove(username);
+                else if (variables[Context.Guild].BlueTeam.Contains(username))
+                    variables[Context.Guild].BlueTeam.Remove(username);
 
                 await ReplyAsync($"Removed `{username}` from `{prevTeam}`");
             }
@@ -93,13 +108,13 @@ namespace FishBot.Modules
                     break;
             }
 
-            var builder = new EmbedBuilder()
+            var builder = new EmbedBuilder
             {
-                Color = teamColor,
+                Color = teamColor
             };
 
             var players = variables[Context.Guild].TeamDict.Where(x => x.Value == teamname).ToList();
-            string output = players.Aggregate("", (current, t) => current + (t.Key + "\n"));
+            string output = players.Aggregate("", (current, t) => current + t.Key + "\n");
 
             if (output != "")
                 builder.AddField(teamString, output, true);
@@ -107,6 +122,5 @@ namespace FishBot.Modules
                 await ReplyAsync($"There are no players on `{teamname}`");
             await ReplyAsync("", false, builder.Build());
         }
-
     }
 }

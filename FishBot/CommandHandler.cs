@@ -9,7 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace FishBot
 {
     /// <summary>
-    /// Main class for handling commands etc.
+    ///     Main class for handling commands etc.
     /// </summary>
     public class CommandHandler
     {
@@ -38,19 +38,18 @@ namespace FishBot
 
             var context = new CommandContext(_client, msg);
 
-            int argPos = 0;
+            var argPos = 0;
             if (msg.HasStringPrefix(Config.Load().BotPrefix, ref argPos) ||
                 msg.HasMentionPrefix(_client.CurrentUser, ref argPos))
             {
                 await Program.Log(new LogMessage(LogSeverity.Info, "", msg.Author + ": \"" + msg.Content + "\""));
                 var result = await _cmds.ExecuteAsync(context, argPos, _services);
-                if (!result.IsSuccess)
-                {
-                    await context.Channel.SendMessageAsync(result.ToString());
-                }
+                if (!result.IsSuccess) await context.Channel.SendMessageAsync(result.ToString());
             }
             else
+            {
                 await Program.Log(new LogMessage(LogSeverity.Verbose, "", msg.Author + ": \"" + msg.Content + "\""));
+            }
         }
     }
 }

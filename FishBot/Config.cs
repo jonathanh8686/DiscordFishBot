@@ -38,7 +38,9 @@ namespace FishBot
         }
 
         public void Save()
-            => File.WriteAllText(FilePath, ToJson());
+        {
+            File.WriteAllText(FilePath, ToJson());
+        }
 
         public static Config Load()
         {
@@ -46,6 +48,8 @@ namespace FishBot
         }
 
         public string ToJson()
-            => JsonConvert.SerializeObject(this, Formatting.Indented);
+        {
+            return JsonConvert.SerializeObject(this, Formatting.Indented);
+        }
     }
 }
