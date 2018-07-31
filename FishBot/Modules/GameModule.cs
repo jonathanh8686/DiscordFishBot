@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -17,6 +18,12 @@ namespace FishBot.Modules
         {
             if (variables[Context.Guild].GameInProgress) // check if game is running
             {
+                if (variables[Context.Guild].RedScore + variables[Context.Guild].BlueScore == 9)
+                {
+                    await ReplyAsync(
+                        ":checkered_flag: The game has ended! Use the `.reset` command to play again! Or use the `.afn` to view the algebraic notation :checkered_flag:");
+                    return;
+                }
                 await ReplyAsync(":x: Game is already in progess! :x:");
                 return;
             }
@@ -51,6 +58,12 @@ namespace FishBot.Modules
         {
             if (variables[Context.Guild].GameInProgress)
             {
+                if (variables[Context.Guild].RedScore + variables[Context.Guild].BlueScore == 9)
+                {
+                    await ReplyAsync(
+                        ":checkered_flag: The game has ended! Use the `.reset` command to play again! Or use the `.afn` to view the algebraic notation :checkered_flag:");
+                    return;
+                }
                 await ReplyAsync(":x: Game is already in progess! :x:");
                 return;
             }
@@ -70,6 +83,12 @@ namespace FishBot.Modules
         {
             if (variables[Context.Guild].GameInProgress) // check if the game is in progress
             {
+                if (variables[Context.Guild].RedScore + variables[Context.Guild].BlueScore == 9)
+                {
+                    await ReplyAsync(
+                        ":checkered_flag: The game has ended! Use the `.reset` command to play again! Or use the `.afn` to view the algebraic notation :checkered_flag:");
+                    return;
+                }
                 await ReplyAsync(":trophy: Game is already in progess! :trophy:");
                 return;
             }
@@ -90,9 +109,28 @@ namespace FishBot.Modules
             variables[Context.Guild].GameInProgress = true;
             variables[Context.Guild].CalledHalfSuits.Clear();
 
+            //Create AFN header
+            variables[Context.Guild].AlgebraicNotation += variables[Context.Guild].Players.Count;
+            variables[Context.Guild].AlgebraicNotation += "{" + variables[Context.Guild].RedTeam.Count + "|";
+            variables[Context.Guild].AlgebraicNotation += variables[Context.Guild].BlueTeam.Count +"}";
+            foreach (string redPlayer in variables[Context.Guild].RedTeam)
+            {
+                variables[Context.Guild].AlgebraicNotation +=
+                    redPlayer + "[" + variables[Context.Guild].AuthorUsers[redPlayer] + "]";
+            }
+
+            foreach (string bluePlayer in variables[Context.Guild].BlueTeam)
+            {
+                variables[Context.Guild].AlgebraicNotation +=
+                    bluePlayer + "[" + variables[Context.Guild].AuthorUsers[bluePlayer] + "]";
+            }
+
+            // Starting game
             await ReplyAsync(":trophy: `Starting Game...` :weary:");
             variables[Context.Guild].PlayerTurn = variables[Context.Guild]
                 .Players[new Random().Next(variables[Context.Guild].Players.Count)]; // get random player to start
+
+            variables[Context.Guild].AlgebraicNotation += $"<{variables[Context.Guild].PlayerTurn}>"; // add first player to afn
 
             variables[Context.Guild].GameStart = true;
             await CardDealer.DealCards(Context.Guild);
@@ -103,6 +141,13 @@ namespace FishBot.Modules
         [Summary("Allows a player to call a card from another")]
         public async Task Call(string target, string requestedCard)
         {
+            if (variables[Context.Guild].RedScore + variables[Context.Guild].BlueScore == 9)
+            {
+                await ReplyAsync(
+                    ":checkered_flag: The game has ended! Use the `.reset` command to play again! Or use the `.afn` to view the algebraic notation :checkered_flag:");
+                return;
+            }
+
             if (!variables[Context.Guild].GameInProgress)
             {
                 await ReplyAsync($":x: Game is not in progress yet! :x:");
@@ -176,6 +221,8 @@ namespace FishBot.Modules
 
             if (variables[Context.Guild].PlayerCards[variables[Context.Guild].PlayerTurn].Contains(req) || !hasHalfSuit) // player already has the card or they don't have something in the halfsuit
             {
+                variables[Context.Guild].AlgebraicNotation += $"call {target} {requestedCard} illegal;";
+
                 builder.Color = Color.Magenta;
                 builder.Description = ":oncoming_police_car: ILLEGAL CALL! :oncoming_police_car:";
 
@@ -191,6 +238,8 @@ namespace FishBot.Modules
             if (variables[Context.Guild].PlayerCards[target].Contains(req))
             {
                 // hit
+                variables[Context.Guild].AlgebraicNotation += $"call {target} {requestedCard} hit;";
+
                 builder.Color = Color.Green;
                 builder.Description = ":boom: Call was a hit! :boom:";
                 builder.ThumbnailUrl =
@@ -205,6 +254,8 @@ namespace FishBot.Modules
             else
             {
                 // miss
+                variables[Context.Guild].AlgebraicNotation += $"call {target} {requestedCard} miss;";
+
                 builder.Color = Color.DarkRed;
                 builder.Description = ":thinking: Call was a miss! :thinking:";
                 builder.ThumbnailUrl =
@@ -232,6 +283,13 @@ namespace FishBot.Modules
         public async Task CallHalfSuit(string halfsuit, string callstring)
         {
             halfsuit = halfsuit.ToUpperInvariant();
+
+            if (variables[Context.Guild].RedScore + variables[Context.Guild].BlueScore == 9)
+            {
+                await ReplyAsync(
+                    ":checkered_flag: The game has ended! Use the `.reset` command to play again! Or use the `.afn` to view the algebraic notation :checkered_flag:");
+                return;
+            }
 
             if (!variables[Context.Guild].GameInProgress)
             {
@@ -317,6 +375,8 @@ namespace FishBot.Modules
 
             if (works)
             {
+                variables[Context.Guild].AlgebraicNotation += $"callhs {username} {halfsuit} {callstring} hit;";
+
                 builder.Color = Color.Green;
                 builder.Description = $":boom: `{username}` **hit** the `{halfsuit}`! :boom:";
                 if (team == "red") variables[Context.Guild].RedScore++;
@@ -324,6 +384,8 @@ namespace FishBot.Modules
             }
             else
             {
+                variables[Context.Guild].AlgebraicNotation += $"callhs {username} {halfsuit} {callstring} miss;";
+
                 builder.Color = Color.DarkRed;
                 builder.Description = $":thinking: `{username}` **missed** the `{halfsuit}`! :thinking:";
                 if (team == "red") variables[Context.Guild].BlueScore++;
@@ -339,6 +401,15 @@ namespace FishBot.Modules
             {
                 variables[Context.Guild].GameInProgress = false;
                 await DeclareResult();
+            }
+            else
+            {
+                if (variables[Context.Guild].RedScore >= 5)
+                    await ReplyAsync(
+                        "Red Team has clinched the game!! Use `.reset` to stop the game now, or continue playing! Also you may view the AFN using the `.afn` command");
+                else if (variables[Context.Guild].BlueScore >= 5)
+                    await ReplyAsync(
+                        "Blue Team has clinched the game!! Use `.reset` to stop the game now, or continue playing! Also you may view the AFN using the `.afn` command");
             }
 
             if (CheckPlayerTurnHandEmpty())
@@ -395,6 +466,8 @@ namespace FishBot.Modules
                 await ReplyAsync($":weary: It is now `{username}`'s turn! :weary:");
                 variables[Context.Guild].NeedsDesignatedPlayer = false;
 
+                variables[Context.Guild].AlgebraicNotation += $"designate {username};";
+
                 if (CheckPlayerTurnHandEmpty())
                 {
                     await ReplyAsync(
@@ -415,13 +488,19 @@ namespace FishBot.Modules
             await ReplyAsync($"`{username}` has **{variables[Context.Guild].PlayerCards[username].Count}** cards.");
         }
 
-
         [Command("reset")]
         [Summary("Resets the game")]
         public async Task Reset()
         {
             variables[Context.Guild] = new DataStorage();
             await ReplyAsync(":gear: All variables reinitalized. :gear:");
+        }
+
+        [Command("afn")]
+        [Summary("Displays the AFN for the game")]
+        public async Task AFN()
+        {
+            await ReplyAsync(variables[Context.Guild].AlgebraicNotation);
         }
 
         private async Task DeclareResult()
@@ -443,7 +522,8 @@ namespace FishBot.Modules
                 $"Blue Team: {variables[Context.Guild].BlueScore}\n Red Team: {variables[Context.Guild].RedScore}");
             await ReplyAsync("", false, builder.Build());
 
-            variables[Context.Guild] = new DataStorage();
+            await ReplyAsync(
+                ":checkered_flag: The game has ended! Use the `.reset` command to play again! Or use the `.afn` to view the algebraic notation :checkered_flag:");
         }
 
         private bool CheckPlayerTurnHandEmpty()

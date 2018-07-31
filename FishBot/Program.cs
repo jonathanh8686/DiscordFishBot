@@ -44,6 +44,7 @@ namespace FishBot
 
             _client.Log += Log;
             _client.GuildAvailable += GuildAvailable;
+            _client.JoinedGuild += JoinedGuild;
 
             _auditLog = new AuditLog();
             _auditLog.Mount(_client);
@@ -60,6 +61,11 @@ namespace FishBot
         }
 
         private async Task GuildAvailable(SocketGuild g)
+        {
+            variables.Add(g, new DataStorage());
+        }
+
+        private async Task JoinedGuild(SocketGuild g)
         {
             variables.Add(g, new DataStorage());
         }
@@ -147,9 +153,9 @@ namespace FishBot
             pattern = pattern.Replace("(", "\\(");
             var matches = Regex.Matches(data, pattern);
             return (from Match nextOne in matches
-                select nextOne.Value
+                    select nextOne.Value
                 into strTemp
-                select GetMiddle(strTemp, begin, end).Replace("&amp; ", "")).ToList();
+                    select GetMiddle(strTemp, begin, end).Replace("&amp; ", "")).ToList();
         }
 
         public static string StripHTML(string htmlString)

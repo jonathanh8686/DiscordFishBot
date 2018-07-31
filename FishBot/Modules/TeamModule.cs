@@ -64,7 +64,7 @@ namespace FishBot.Modules
             if (!variables[Context.Guild].TeamDict.ContainsKey(username))
             {
                 await ReplyAsync(
-                    $"`{username}` is not already on a team! Add them onto a team using \"-team add USERNAME\"");
+                    $":x: `{username}` is not already on a team! Add them onto a team using \".team add USERNAME\" :x:");
             }
             else
             {
@@ -92,7 +92,7 @@ namespace FishBot.Modules
 
             if (teamname != "red" && teamname != "blue")
             {
-                await ReplyAsync($"That team name is not valid! Please only use the teams \"Blue\" and \"Red\"");
+                await ReplyAsync($":x: That team name is not valid! Please only use the teams \"Blue\" and \"Red\" :anger:");
                 return;
             }
 
@@ -117,10 +117,13 @@ namespace FishBot.Modules
             string output = players.Aggregate("", (current, t) => current + t.Key + "\n");
 
             if (output != "")
+            {
                 builder.AddField(teamString, output, true);
+                await ReplyAsync("", false, builder.Build());
+            }
             else
-                await ReplyAsync($"There are no players on `{teamname}`");
-            await ReplyAsync("", false, builder.Build());
+                await ReplyAsync($":pensive: There are no players on `{teamname}` :pensive:");
+            
         }
     }
 }

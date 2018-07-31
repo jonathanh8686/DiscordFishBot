@@ -39,7 +39,8 @@ namespace FishBot
             if (!Program.variables.ContainsKey(context.Guild))
             {
                 await context.Channel.SendMessageAsync(
-                    "Guild not recognized! Either this is a DM with the bot, or **Jonathan needs to know about this**");
+                    "Guild not recognized! **Tell Jonathan!!!!!**");
+                return;
             }
 
             var argPos = 0;
