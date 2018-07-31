@@ -31,12 +31,16 @@ namespace FishBot
 
         private async Task HandleCommandAsync(SocketMessage s)
         {
-            var msg = s as SocketUserMessage;
-
-            if (msg == null) return;
+            if (!(s is SocketUserMessage msg)) return;
             if (msg.Author.IsBot) return;
 
             var context = new CommandContext(_client, msg);
+
+            if (!Program.variables.ContainsKey(context.Guild))
+            {
+                await context.Channel.SendMessageAsync(
+                    "Guild not recognized! Either this is a DM with the bot, or **Jonathan needs to know about this**");
+            }
 
             var argPos = 0;
             if (msg.HasStringPrefix(Config.Load().BotPrefix, ref argPos) ||

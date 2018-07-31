@@ -59,8 +59,7 @@ namespace FishBot
             await Task.Delay(-1);
         }
 
-        private async Task
-            GuildAvailable(SocketGuild g)
+        private async Task GuildAvailable(SocketGuild g)
         {
             variables.Add(g, new DataStorage());
         }

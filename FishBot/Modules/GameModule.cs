@@ -17,31 +17,31 @@ namespace FishBot.Modules
         {
             if (variables[Context.Guild].GameInProgress) // check if game is running
             {
-                await ReplyAsync("Game is already in progess!");
+                await ReplyAsync(":x: Game is already in progess! :x:");
                 return;
             }
 
             if (variables[Context.Guild].AuthorUsers.Values.Contains(Context.User)) // check if username is taken
             {
-                await ReplyAsync($"`{Context.User.Username}` has already claimed a username!");
+                await ReplyAsync($":x: `{Context.User.Username}` has already claimed a username! :x:");
                 return;
             }
 
             if (!variables[Context.Guild].Players.Contains(username)) // check if username exists
             {
-                await ReplyAsync($"`{username}` is not a valid username!");
+                await ReplyAsync($":x: `{username}` is not a valid username! :x:");
                 return;
             }
 
             if (!variables[Context.Guild].AuthorUsers.ContainsKey(username))
             {
                 variables[Context.Guild].AuthorUsers.Add(username, Context.User);
-                await ReplyAsync($"`{username}` is now assigned to `{variables[Context.Guild].AuthorUsers[username]}`");
+                await ReplyAsync($":link: `{username}` is now assigned to `{variables[Context.Guild].AuthorUsers[username]}` :link:");
             }
             else
             {
                 await ReplyAsync(
-                    $"`{username}` is already assigned to `{variables[Context.Guild].AuthorUsers[username]}`");
+                    $":x: `{username}` is already assigned to `{variables[Context.Guild].AuthorUsers[username]}` :x:");
             }
         }
 
@@ -51,7 +51,7 @@ namespace FishBot.Modules
         {
             if (variables[Context.Guild].GameInProgress)
             {
-                await ReplyAsync("Game is already in progess!");
+                await ReplyAsync(":x: Game is already in progess! :x:");
                 return;
             }
 
@@ -61,7 +61,7 @@ namespace FishBot.Modules
                     newAuthorUsers.Remove(user.Key); // unpair discord IUser to username
             variables[Context.Guild].AuthorUsers = new Dictionary<string, IUser>(newAuthorUsers);
 
-            await ReplyAsync($"Removed all links associated with {Context.User.Username}");
+            await ReplyAsync($":white_check_mark: Removed all links associated with {Context.User.Username}");
         }
 
         [Command("start")]
@@ -70,7 +70,7 @@ namespace FishBot.Modules
         {
             if (variables[Context.Guild].GameInProgress) // check if the game is in progress
             {
-                await ReplyAsync("Game is already in progess!");
+                await ReplyAsync(":trophy: Game is already in progess! :trophy:");
                 return;
             }
 
@@ -83,20 +83,20 @@ namespace FishBot.Modules
             foreach (string player in variables[Context.Guild].Players) // make sure that each username is attached to a IUser
             {
                 if (variables[Context.Guild].AuthorUsers.ContainsKey(player)) continue;
-                await ReplyAsync($"{player} is not attached to a SocketUser!");
+                await ReplyAsync($":x: {player} is not attached to a SocketUser! :x:");
                 return;
             }
 
             variables[Context.Guild].GameInProgress = true;
             variables[Context.Guild].CalledHalfSuits.Clear();
 
-            await ReplyAsync("`Starting Game...`");
+            await ReplyAsync(":trophy: `Starting Game...` :weary:");
             variables[Context.Guild].PlayerTurn = variables[Context.Guild]
                 .Players[new Random().Next(variables[Context.Guild].Players.Count)]; // get random player to start
 
             variables[Context.Guild].GameStart = true;
             await CardDealer.DealCards(Context.Guild);
-            await ReplyAsync($"It's `{variables[Context.Guild].PlayerTurn}`'s turn!");
+            await ReplyAsync($":game_die: It's `{variables[Context.Guild].PlayerTurn}`'s turn!");
         }
 
         [Command("call")]
@@ -105,7 +105,7 @@ namespace FishBot.Modules
         {
             if (!variables[Context.Guild].GameInProgress)
             {
-                await ReplyAsync($"Game is not in progress yet!");
+                await ReplyAsync($":x: Game is not in progress yet! :x:");
 
                 await Context.Message.DeleteAsync();
                 return;
@@ -120,7 +120,7 @@ namespace FishBot.Modules
             if (variables[Context.Guild].TeamDict[target] ==
                 variables[Context.Guild].TeamDict[variables[Context.Guild].PlayerTurn])
             {
-                await ReplyAsync($"Cannot call cards from someone on your team!");
+                await ReplyAsync($":x: Cannot call cards from someone on your team! :x:");
 
                 await Context.Message.DeleteAsync();
                 return;
@@ -128,7 +128,7 @@ namespace FishBot.Modules
 
             if (variables[Context.Guild].PlayerCards[target].Count == 0)
             {
-                await ReplyAsync($"Cannot call a player with 0 cards!");
+                await ReplyAsync($":x: Cannot call a player with no cards! :x:");
 
                 await Context.Message.DeleteAsync();
                 return;
@@ -144,7 +144,7 @@ namespace FishBot.Modules
             var req = CardDealer.GetCardByName(requestedCard.ToUpperInvariant());
             if (!variables[Context.Guild].Players.Contains(target)) // make sure the target is a valid player
             {
-                await ReplyAsync($"`{target}` is not a player!");
+                await ReplyAsync($":x: `{target}` is not a player! :x:");
 
                 await Context.Message.DeleteAsync();
                 return;
@@ -152,7 +152,7 @@ namespace FishBot.Modules
 
             if (!CardDealer.CardNames.Contains(requestedCard)) // make sure requestedCard is a valid card
             {
-                await ReplyAsync($"`{requestedCard}` is not a valid card!");
+                await ReplyAsync($":x: `{requestedCard}` is not a valid card! :x:");
 
                 await Context.Message.DeleteAsync();
                 return;
@@ -177,7 +177,7 @@ namespace FishBot.Modules
             if (variables[Context.Guild].PlayerCards[variables[Context.Guild].PlayerTurn].Contains(req) || !hasHalfSuit) // player already has the card or they don't have something in the halfsuit
             {
                 builder.Color = Color.Magenta;
-                builder.Description = "ILLEGAL CALL!";
+                builder.Description = ":oncoming_police_car: ILLEGAL CALL! :oncoming_police_car:";
 
                 builder.AddField("Info",
                     $"`{variables[Context.Guild].PlayerTurn}` called the `{requestedCard}` from `{target}` but it was **illegal**!\n It is now `{target}`'s turn.");
@@ -192,7 +192,7 @@ namespace FishBot.Modules
             {
                 // hit
                 builder.Color = Color.Green;
-                builder.Description = "Call was a hit!";
+                builder.Description = ":boom: Call was a hit! :boom:";
                 builder.ThumbnailUrl =
                     "https://raw.githubusercontent.com/jonathanh8686/DiscordFishBot/master/FishBot/cards/hit.png";
 
@@ -206,7 +206,7 @@ namespace FishBot.Modules
             {
                 // miss
                 builder.Color = Color.DarkRed;
-                builder.Description = "Call was a miss!";
+                builder.Description = ":thinking: Call was a miss! :thinking:";
                 builder.ThumbnailUrl =
                     "https://raw.githubusercontent.com/jonathanh8686/DiscordFishBot/master/FishBot/cards/miss.png";
 
@@ -235,19 +235,19 @@ namespace FishBot.Modules
 
             if (!variables[Context.Guild].GameInProgress)
             {
-                await ReplyAsync($"Game is not in progress yet!");
+                await ReplyAsync($":x: Game is not in progress yet! :x:");
                 return;
             } // make sure game is in progress
 
             if (!CardDealer.HalfSuitNames.Contains(halfsuit))
             {
-                await ReplyAsync($"`{halfsuit}` is not a valid halfsuit!");
+                await ReplyAsync($":x: `{halfsuit}` is not a valid halfsuit! :x:");
                 return;
             } // make sure that the halfsuit called is valid
 
             if (variables[Context.Guild].CalledHalfSuits.Contains(halfsuit))
             {
-                await ReplyAsync($"`{halfsuit}` was already called!");
+                await ReplyAsync($":x: `{halfsuit}` was already called! :x:");
                 return;
             } // make sure that the halfsuit has not already been called
 
@@ -266,7 +266,7 @@ namespace FishBot.Modules
                 if (!CardDealer.CardNames.Contains(strSeg) && !variables[Context.Guild].Players.Contains(strSeg))
                 {
                     await ReplyAsync(
-                        $"`{strSeg}` not recognized as a card or a player!"); // if a strSeg in the callString is not a player nor a card then it's invalid
+                        $":x: `{strSeg}` not recognized as a card or a player! :x:"); // if a strSeg in the callString is not a player nor a card then it's invalid
                     return;
                 }
 
@@ -281,7 +281,7 @@ namespace FishBot.Modules
                     if (variables[Context.Guild].TeamDict[cuser] !=
                         variables[Context.Guild].TeamDict[authorName])
                     {
-                        await ReplyAsync($"callString included players not on your team!");
+                        await ReplyAsync($":x: callString included players not on your team! :x:");
                         return;
                     }
 
@@ -313,19 +313,19 @@ namespace FishBot.Modules
             await CardDealer.SendCards(Context.Guild);
             string team = variables[Context.Guild].TeamDict[username];
 
-            var builder = new EmbedBuilder {Title = "HalfSuit Call"};
+            var builder = new EmbedBuilder {Title = ":telephone_receiver: HalfSuit Call :telephone_receiver:" };
 
             if (works)
             {
                 builder.Color = Color.Green;
-                builder.Description = $"`{username}` **hit** the `{halfsuit}`!";
+                builder.Description = $":boom: `{username}` **hit** the `{halfsuit}`! :boom:";
                 if (team == "red") variables[Context.Guild].RedScore++;
                 else variables[Context.Guild].BlueScore++;
             }
             else
             {
                 builder.Color = Color.DarkRed;
-                builder.Description = $"`{username}` **missed** the `{halfsuit}`!";
+                builder.Description = $":thinking: `{username}` **missed** the `{halfsuit}`! :thinking:";
                 if (team == "red") variables[Context.Guild].BlueScore++;
                 else variables[Context.Guild].RedScore++;
             }
@@ -344,11 +344,10 @@ namespace FishBot.Modules
             if (CheckPlayerTurnHandEmpty())
             {
                 await ReplyAsync(
-                    $"{variables[Context.Guild].PlayerTurn} is out of cards! Use the `.designate` command to select the next player!");
+                    $":open_mouth: {variables[Context.Guild].PlayerTurn} is out of cards! Use the `.designate` command to select the next player! :open_mouth:");
                 variables[Context.Guild].NeedsDesignatedPlayer = true;
             }
         }
-
 
         [Command("score")]
         [Summary("Shows the current score")]
@@ -356,7 +355,7 @@ namespace FishBot.Modules
         {
             if (!variables[Context.Guild].GameInProgress)
             {
-                await ReplyAsync("Game not yet in progress!");
+                await ReplyAsync(":x: Game not yet in progress! :x:");
                 return;
             }
 
@@ -380,7 +379,7 @@ namespace FishBot.Modules
         {
             if (!variables[Context.Guild].GameInProgress)
             {
-                await ReplyAsync($"Game is not yet in progress!");
+                await ReplyAsync($":x: Game is not yet in progress! :x:");
                 return;
             }
 
@@ -388,24 +387,24 @@ namespace FishBot.Modules
             {
                 if (!variables[Context.Guild].Players.Contains(username))
                 {
-                    await ReplyAsync($"`{username}` is not a valid username!");
+                    await ReplyAsync($":x: `{username}` is not a valid username! :x:");
                     return;
                 }
 
                 variables[Context.Guild].PlayerTurn = username;
-                await ReplyAsync($"It is now `{username}`'s turn!");
+                await ReplyAsync($":weary: It is now `{username}`'s turn! :weary:");
                 variables[Context.Guild].NeedsDesignatedPlayer = false;
 
                 if (CheckPlayerTurnHandEmpty())
                 {
                     await ReplyAsync(
-                        $"`{variables[Context.Guild].PlayerTurn}` is out of cards! Use the `.designate` command to select the next player!");
+                        $":open_mouth: `{variables[Context.Guild].PlayerTurn}` is out of cards! Use the `.designate` command to select the next player! :open_mouth:");
                     variables[Context.Guild].NeedsDesignatedPlayer = true;
                 }
             }
             else
             {
-                await ReplyAsync("A designated player is not needed right now!");
+                await ReplyAsync(":rage: A designated player is not needed right now! :rage:");
             }
         }
 
@@ -422,7 +421,7 @@ namespace FishBot.Modules
         public async Task Reset()
         {
             variables[Context.Guild] = new DataStorage();
-            await ReplyAsync("All variables reinitalized.");
+            await ReplyAsync(":gear: All variables reinitalized. :gear:");
         }
 
         private async Task DeclareResult()
@@ -432,12 +431,12 @@ namespace FishBot.Modules
             if (variables[Context.Guild].RedScore > variables[Context.Guild].BlueScore)
             {
                 builder.Color = Color.Red;
-                builder.Description = "Red team wins!";
+                builder.Description = ":red_circle: Red team wins! :red_circle:";
             }
             else
             {
                 builder.Color = Color.Blue;
-                builder.Description = "Blue team wins!";
+                builder.Description = ":large_blue_circle: Blue team wins! :large_blue_circle:";
             }
 
             builder.AddField("Final Scores",
