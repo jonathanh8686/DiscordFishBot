@@ -74,15 +74,13 @@ namespace FishBot.Modules
                 return;
             }
 
-            if (variables[Context.Guild].RedTeam.Count != variables[Context.Guild].BlueTeam.Count
-            ) // make sure the teams are even
-            {
-                await ReplyAsync($"Teams are not even! Check teams using the `.team list` command");
-                return;
-            }
+            //if (variables[Context.Guild].RedTeam.Count != variables[Context.Guild].BlueTeam.Count) // make sure the teams are even
+            //{
+            //    await ReplyAsync($"Teams are not even! Check teams using the `.team list` command");
+            //    return;
+            //}
 
-            foreach (string player in variables[Context.Guild].Players
-            ) // make sure that each username is attached to a IUser
+            foreach (string player in variables[Context.Guild].Players) // make sure that each username is attached to a IUser
             {
                 if (variables[Context.Guild].AuthorUsers.ContainsKey(player)) continue;
                 await ReplyAsync($"{player} is not attached to a SocketUser!");
@@ -128,6 +126,14 @@ namespace FishBot.Modules
                 return;
             } // make sure they call someone on the opposite team
 
+            if (variables[Context.Guild].PlayerCards[target].Count == 0)
+            {
+                await ReplyAsync($"Cannot call a player with 0 cards!");
+
+                await Context.Message.DeleteAsync();
+                return;
+            }
+
             // delete previous call info
             var rawMessages = Context.Channel.GetMessagesAsync().FlattenAsync();
             foreach (var msg in rawMessages.Result)
@@ -168,8 +174,7 @@ namespace FishBot.Modules
                     .Contains(CardDealer.GetCardByName(CardDealer.CardNames[6 * hsIndex + i])))
                     hasHalfSuit = true;
 
-            if (variables[Context.Guild].PlayerCards[variables[Context.Guild].PlayerTurn].Contains(req) || !hasHalfSuit
-            ) // player already has the card or they don't have something in the halfsuit
+            if (variables[Context.Guild].PlayerCards[variables[Context.Guild].PlayerTurn].Contains(req) || !hasHalfSuit) // player already has the card or they don't have something in the halfsuit
             {
                 builder.Color = Color.Magenta;
                 builder.Description = "ILLEGAL CALL!";

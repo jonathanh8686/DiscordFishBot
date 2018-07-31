@@ -51,7 +51,6 @@ namespace FishBot.Modules
             }
         }
 
-
         [Command("remove")]
         [Summary("Removes a player from team")]
         public async Task Remove(string username)
@@ -71,6 +70,7 @@ namespace FishBot.Modules
             {
                 string prevTeam = variables[Context.Guild].TeamDict[username];
                 variables[Context.Guild].TeamDict.Remove(username);
+                variables[Context.Guild].Players.Remove(username);
 
                 if (variables[Context.Guild].RedTeam.Contains(username))
                     variables[Context.Guild].RedTeam.Remove(username);
