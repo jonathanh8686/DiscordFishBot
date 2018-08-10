@@ -330,3 +330,4 @@ ASALocalRun/
 
 # Application Data
 config/
+SecretModule.cs

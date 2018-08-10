@@ -85,6 +85,8 @@ namespace FishBot
 
                 var builder = new EmbedBuilder {Title = $"{user.Key}'s hand"};
                 var halfSuitCards = "\n";
+                var rawNames = "";
+
                 for (var i = 0; i < CardNames.Count; i++)
                 {
                     if (i % 6 == 0 && i != 0)
@@ -96,6 +98,8 @@ namespace FishBot
 
                     if (!variables[cguild].PlayerCards[user.Key].Contains(Cards[CardNames[i]])) continue;
                     var cardNameOutput = "";
+
+                    rawNames += CardNames[i] + "\n";
                     if (CardNames[i].Length == 3)
                         cardNameOutput = ":one::zero:";
                     else if (char.IsNumber(CardNames[i][0]))
@@ -125,6 +129,9 @@ namespace FishBot
                         cardNameOutput = ":black_joker::heavy_minus_sign:";
                     halfSuitCards += cardNameOutput + "\n";
                 }
+
+                Console.WriteLine(user.Key);
+                Console.WriteLine(rawNames);
 
                 if (halfSuitCards != "\n")
                     builder.AddField(HalfSuitNames[8], halfSuitCards);

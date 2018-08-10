@@ -35,6 +35,7 @@ namespace FishBot.Modules
                     var result = await cmd.CheckPreconditionsAsync(Context);
                     if (!result.IsSuccess) continue;
 
+                    if (cmd.Module.Name == "SecretModule") continue;
                     description += $"{prefix}{cmd.Aliases.First()} ";
                     description = cmd.Parameters.Aggregate(description, (current, pm) => current + $"[{pm.Name}] ");
                     description += Environment.NewLine;

@@ -431,7 +431,7 @@ namespace FishBot.Modules
                         "Blue Team has clinched the game!! Use `.reset` to stop the game now, or continue playing! Also you may view the AFN using the `.afn` command");
             }
 
-            if (CheckPlayerTurnHandEmpty())
+            if (CheckPlayerTurnHandEmpty() && variables[Context.Guild].GameInProgress)
             {
                 await ReplyAsync(
                     $":open_mouth: {variables[Context.Guild].PlayerTurn} is out of cards! Use the `.designate` command to select the next player! :open_mouth:");
@@ -519,9 +519,9 @@ namespace FishBot.Modules
         [Summary("Displays the AFN for the game")]
         public async Task AFN()
         {
-            if (variables[Context.Guild].AlgebraicNotation == string.Empty)
+            if (!variables[Context.Guild].GameClinch)
             {
-                await ReplyAsync("AFN is empty right now, make a move!");
+                await ReplyAsync(":x: Cannot view AFN while game is in progress! :x:");
                 return;
             }
            
