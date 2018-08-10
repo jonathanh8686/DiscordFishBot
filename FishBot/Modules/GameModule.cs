@@ -12,70 +12,70 @@ namespace FishBot.Modules
     [Name("Game")]
     public class GameModule : ModuleBase
     {
-        [Command("claim")]
-        [Summary("Claim a username in the game")]
-        public async Task Claim(string username)
-        {
-            if (variables[Context.Guild].GameInProgress) // check if game is running
-            {
-                if (variables[Context.Guild].RedScore + variables[Context.Guild].BlueScore == 9)
-                {
-                    await ReplyAsync(
-                        ":checkered_flag: The game has ended! Use the `.reset` command to play again! Or use the `.afn` to view the algebraic notation :checkered_flag:");
-                    return;
-                }
-                await ReplyAsync(":x: Game is already in progess! :x:");
-                return;
-            }
+        //[Command("claim")]
+        //[Summary("Claim a username in the game")]
+        //public async Task Claim(string username)
+        //{
+        //    if (variables[Context.Guild].GameInProgress) // check if game is running
+        //    {
+        //        if (variables[Context.Guild].RedScore + variables[Context.Guild].BlueScore == 9)
+        //        {
+        //            await ReplyAsync(
+        //                ":checkered_flag: The game has ended! Use the `.reset` command to play again! Or use the `.afn` to view the algebraic notation :checkered_flag:");
+        //            return;
+        //        }
+        //        await ReplyAsync(":x: Game is already in progess! :x:");
+        //        return;
+        //    }
 
-            if (variables[Context.Guild].AuthorUsers.Values.Contains(Context.User)) // check if username is taken
-            {
-                await ReplyAsync($":x: `{Context.User.Username}` has already claimed a username! :x:");
-                return;
-            }
+        //    if (variables[Context.Guild].AuthorUsers.Values.Contains(Context.User)) // check if username is taken
+        //    {
+        //        await ReplyAsync($":x: `{Context.User.Username}` has already claimed a username! :x:");
+        //        return;
+        //    }
 
-            if (!variables[Context.Guild].Players.Contains(username)) // check if username exists
-            {
-                await ReplyAsync($":x: `{username}` is not a valid username! :x:");
-                return;
-            }
+        //    if (!variables[Context.Guild].Players.Contains(username)) // check if username exists
+        //    {
+        //        await ReplyAsync($":x: `{username}` is not a valid username! :x:");
+        //        return;
+        //    }
 
-            if (!variables[Context.Guild].AuthorUsers.ContainsKey(username))
-            {
-                variables[Context.Guild].AuthorUsers.Add(username, Context.User);
-                await ReplyAsync($":link: `{username}` is now assigned to `{variables[Context.Guild].AuthorUsers[username]}` :link:");
-            }
-            else
-            {
-                await ReplyAsync(
-                    $":x: `{username}` is already assigned to `{variables[Context.Guild].AuthorUsers[username]}` :x:");
-            }
-        }
+        //    if (!variables[Context.Guild].AuthorUsers.ContainsKey(username)) // link it
+        //    {
+        //        variables[Context.Guild].AuthorUsers.Add(username, Context.User);
+        //        await ReplyAsync($":link: `{username}` is now assigned to `{variables[Context.Guild].AuthorUsers[username]}` :link:");
+        //    }
+        //    else
+        //    {
+        //        await ReplyAsync(
+        //            $":x: `{username}` is already assigned to `{variables[Context.Guild].AuthorUsers[username]}` :x:");
+        //    }
+        //}
 
-        [Command("unclaim")]
-        [Summary("Unclaim a username in game")]
-        public async Task Unclaim()
-        {
-            if (variables[Context.Guild].GameInProgress)
-            {
-                if (variables[Context.Guild].RedScore + variables[Context.Guild].BlueScore == 9)
-                {
-                    await ReplyAsync(
-                        ":checkered_flag: The game has ended! Use the `.reset` command to play again! Or use the `.afn` to view the algebraic notation :checkered_flag:");
-                    return;
-                }
-                await ReplyAsync(":x: Game is already in progess! :x:");
-                return;
-            }
+        //[Command("unclaim")]
+        //[Summary("Unclaim a username in game")]
+        //public async Task Unclaim()
+        //{
+        //    if (variables[Context.Guild].GameInProgress)
+        //    {
+        //        if (variables[Context.Guild].RedScore + variables[Context.Guild].BlueScore == 9)
+        //        {
+        //            await ReplyAsync(
+        //                ":checkered_flag: The game has ended! Use the `.reset` command to play again! Or use the `.afn` to view the algebraic notation :checkered_flag:");
+        //            return;
+        //        }
+        //        await ReplyAsync(":x: Game is already in progess! :x:");
+        //        return;
+        //    }
 
-            var newAuthorUsers = new Dictionary<string, IUser>(variables[Context.Guild].AuthorUsers);
-            foreach (var user in variables[Context.Guild].AuthorUsers)
-                if (user.Value == Context.User)
-                    newAuthorUsers.Remove(user.Key); // unpair discord IUser to username
-            variables[Context.Guild].AuthorUsers = new Dictionary<string, IUser>(newAuthorUsers);
+        //    var newAuthorUsers = new Dictionary<string, IUser>(variables[Context.Guild].AuthorUsers);
+        //    foreach (var user in variables[Context.Guild].AuthorUsers)
+        //        if (user.Value == Context.User)
+        //            newAuthorUsers.Remove(user.Key); // unpair discord IUser to username
+        //    variables[Context.Guild].AuthorUsers = new Dictionary<string, IUser>(newAuthorUsers);
 
-            await ReplyAsync($":white_check_mark: Removed all links associated with {Context.User.Username}");
-        }
+        //    await ReplyAsync($":white_check_mark: Removed all links associated with {Context.User.Username}");
+        //} // old claiming code
 
         [Command("start")]
         [Summary("Starts the game!")]
@@ -90,6 +90,12 @@ namespace FishBot.Modules
                     return;
                 }
                 await ReplyAsync(":trophy: Game is already in progess! :trophy:");
+                return;
+            }
+
+            if (variables[Context.Guild].Players.Count == 0)
+            {
+                await ReplyAsync(":x: There are not enough players!! :x:");
                 return;
             }
 
@@ -353,10 +359,23 @@ namespace FishBot.Modules
             }
 
             foreach (string card in claimedCards)
+            {
                 if (!variables[Context.Guild].PlayerCards[cuser].Contains(CardDealer.GetCardByName(card)))
                     works = false;
+            }
 
             int hsindex = CardDealer.HalfSuitNames.IndexOf(halfsuit);
+
+            foreach (string card in claimedCards)
+            {
+                for (var i = 0; i < 6; i++)
+                    if (!claimedCards.Contains(CardDealer.CardNames[hsindex * 6 + i]))
+                    {
+                        await ReplyAsync(":x: Cards do not match up with the halfsuit :x: (you autist)");
+                        return;
+                    }
+            }
+
             for (var i = 0; i < 6; i++) // cards
                 foreach (string t in variables[Context.Guild].Players)
                     variables[Context.Guild].PlayerCards[t]
@@ -500,6 +519,12 @@ namespace FishBot.Modules
         [Summary("Displays the AFN for the game")]
         public async Task AFN()
         {
+            if (variables[Context.Guild].AlgebraicNotation == string.Empty)
+            {
+                await ReplyAsync("AFN is empty right now, make a move!");
+                return;
+            }
+           
             await ReplyAsync(variables[Context.Guild].AlgebraicNotation);
         }
 
