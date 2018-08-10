@@ -16,10 +16,6 @@ Use the team module to create teams. (As of now, teams do not need to be balance
 
 `.team remove [username]` - **Removes a player from whatever team he/she is on.**
 
-`.claim [username]` - **Links user of the command's discord account to whatever username they enter.** Because FishBot will DM you your hand, it needs to link your discord account to the username you entered. This command links the two together.
-
-`.unclaim` - **Removes links made by user**
-
 `.team list [team name]` - **Lists users on a given team**
 
 ### In-Game Commands
