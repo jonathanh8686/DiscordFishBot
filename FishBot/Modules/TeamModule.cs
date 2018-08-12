@@ -12,16 +12,10 @@ namespace FishBot.Modules
     [Group("team")]
     public class TeamModule : ModuleBase
     {
-        [Command("add")]
-        [Summary("Adds a player to red team or blue team")]
-        public async Task Add(string username, string teamname)
+        [Command("join")]
+        [Summary("Allows a player to join a team (Red or Blue)")]
+        public async Task Join(string teamname)
         {
-            if (CardDealer.CardNames.Contains(username) || username.Contains(" ")) // make sure nobody sets their username to be a card
-            {
-                await ReplyAsync($"Can't set {username} as your username");
-                return;
-            }
-
             if (variables[Context.Guild].GameInProgress) // make sure once game in the progress, teams can't change
             {
                 await ReplyAsync($"Game is in progress; Teams are locked in!");
@@ -34,6 +28,8 @@ namespace FishBot.Modules
                 await ReplyAsync($"That team name is not valid! Please only use the teams \"Blue\" and \"Red\"");
                 return;
             }
+
+            string username = Context.User.Username;
 
             if (variables[Context.Guild].AuthorUsers.ContainsValue(Context.User))
             {
@@ -57,10 +53,12 @@ namespace FishBot.Modules
             await ReplyAsync($"Added `{username}` to `{teamname}`");
         }
 
-        [Command("remove")]
-        [Summary("Removes a player from team")]
-        public async Task Remove(string username)
+        [Command("leave")]
+        [Summary("Allows a player to leave a team")]
+        public async Task Leave()
         {
+            string username = Context.User.Username;
+
             if (variables[Context.Guild].GameInProgress)
             {
                 await ReplyAsync($"Game is in progress; Teams are locked in!");
