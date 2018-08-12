@@ -12,9 +12,9 @@ A simple (quickly put together) bot to allow *intellectuals* to play Canadian Fi
 Use the team module to create teams. (As of now, teams do not need to be balanced - however this may lead to unforeseen bugs). Start all commands relating to team creation with the `.team` prefix.
 
 #### Commands
-`.team add [username] [team]` - **Allows you to add a username to a team.** This username is what everyone in the game will be referring to you as for the rest of the game. It is recommended that you pick something easy to type as it will be typed over and over again. You also cannot have a username containing a space or the name of a card. The only available teams are `Red` and `Blue`.
+`.team join [team]` - **Allows a player to join a team**.
 
-`.team remove [username]` - **Removes a player from whatever team he/she is on.**
+`.team remove` - **Removes a player from whatever team he/she is on.**
 
 `.team list [team name]` - **Lists users on a given team**
 
