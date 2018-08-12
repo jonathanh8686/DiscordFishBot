@@ -31,7 +31,7 @@ Halfsuits are referred to as their suit and whether they are the high or low set
 
 `.call [username] [card name]` - **Allows a user to call a card from another user.** This command takes in a username and a card name. Card naming conventions are stated above.
 
-`.callhs [halfsuit] [callString]` - **Allows a user to call a halfsuit** **_This command is the most complex and easiest to mess up_** The call string should consist of usernames followed by the cards that they have. For example if you, "optimalplayer" decided to call the high spades because you have all of them, the callString looks like `"optimalplayer AS KS QS JS 10S 9S"` *The order of the cards does not matter.* All cards and usernames are case-sensitive. If instead of having all the cards, your teammate, "feedingretard" has the `QS and 10S` then the callString should look like `"ptimalplayer AS KS JS 9S feedingretard QS 10S"`
+`.callhs [halfsuit] [callString]` - **Allows a user to call a halfsuit** **_This command is the most complex and easiest to mess up_** The call string should consist of usernames followed by the cards that they have. For example if you, "optimalplayer" decided to call the high spades because you have all of them, the callString looks like `"optimalplayer AS KS QS JS 10S 9S"` *The order of the cards does not matter.* All cards and usernames are case-sensitive. If instead of having all the cards, your teammate, "feedingretard" has the `QS and 10S` then the callString should look like `"optimalplayer AS KS JS 9S feedingretard QS 10S"`
 
 `.score` - **Displays the current score**
 
