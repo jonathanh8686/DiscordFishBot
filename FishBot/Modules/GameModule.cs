@@ -140,7 +140,7 @@ namespace FishBot.Modules
 
             variables[Context.Guild].GameStart = true;
             await CardDealer.DealCards(Context.Guild);
-            await ReplyAsync($":game_die: It's `{variables[Context.Guild].PlayerTurn}`'s turn!");
+            await ReplyAsync($":game_die: It's {variables[Context.Guild].PlayerTurn}'s turn!");
         }
 
         [Command("call")]
@@ -233,7 +233,7 @@ namespace FishBot.Modules
                 builder.Description = ":oncoming_police_car: ILLEGAL CALL! :oncoming_police_car:";
 
                 builder.AddField("Info",
-                    $"`{variables[Context.Guild].PlayerTurn}` called the `{requestedCard}` from `{target}` but it was **illegal**!\n It is now `{target}`'s turn.");
+                    $"{variables[Context.Guild].PlayerTurn} called the `{requestedCard}` from {target} but it was **illegal**!\n It is now {target}'s turn.");
                 variables[Context.Guild].PlayerTurn = target;
                 await ReplyAsync("*TEMPORARY*", false, builder.Build());
 
@@ -252,7 +252,7 @@ namespace FishBot.Modules
                     "https://raw.githubusercontent.com/jonathanh8686/DiscordFishBot/master/FishBot/cards/hit.png";
 
                 builder.AddField("Info",
-                    $"`{variables[Context.Guild].PlayerTurn}` called the `{requestedCard}` from `{target}` and it was a **hit**!\n It is now `{variables[Context.Guild].PlayerTurn}`'s turn.");
+                    $"{variables[Context.Guild].PlayerTurn} called the `{requestedCard}` from {target} and it was a **hit**!\n It is now {variables[Context.Guild].PlayerTurn}'s turn.");
 
                 variables[Context.Guild].PlayerCards[target].Remove(req);
                 variables[Context.Guild].PlayerCards[variables[Context.Guild].PlayerTurn].Add(req);
@@ -268,7 +268,7 @@ namespace FishBot.Modules
                     "https://raw.githubusercontent.com/jonathanh8686/DiscordFishBot/master/FishBot/cards/miss.png";
 
                 builder.AddField("Info",
-                    $"`{variables[Context.Guild].PlayerTurn}` called the `{requestedCard}` from `{target}` and it was a **miss**!\n It is now `{target}`'s turn.");
+                    $"{variables[Context.Guild].PlayerTurn} called the `{requestedCard}` from {target} and it was a **miss**!\n It is now {target}'s turn.");
                 variables[Context.Guild].PlayerTurn = target;
             }
 
@@ -279,7 +279,7 @@ namespace FishBot.Modules
             if (CheckPlayerTurnHandEmpty())
             {
                 await ReplyAsync(
-                    $"`{variables[Context.Guild].PlayerTurn}` is out of cards! Use the `.designate` command to select the next player!");
+                    $"{variables[Context.Guild].PlayerTurn} is out of cards! Use the `.designate` command to select the next player!");
                 variables[Context.Guild].NeedsDesignatedPlayer = true;
             }
         }
@@ -397,7 +397,7 @@ namespace FishBot.Modules
                 variables[Context.Guild].AlgebraicNotation += $"callhs {username} {halfsuit} {callstring} hit;";
 
                 builder.Color = Color.Green;
-                builder.Description = $":boom: `{username}` **hit** the `{halfsuit}`! :boom:";
+                builder.Description = $":boom: {username} **hit** the `{halfsuit}`! :boom:";
                 if (team == "red") variables[Context.Guild].RedScore++;
                 else variables[Context.Guild].BlueScore++;
             }
@@ -406,7 +406,7 @@ namespace FishBot.Modules
                 variables[Context.Guild].AlgebraicNotation += $"callhs {username} {halfsuit} {callstring} miss;";
 
                 builder.Color = Color.DarkRed;
-                builder.Description = $":thinking: `{username}` **missed** the `{halfsuit}`! :thinking:";
+                builder.Description = $":thinking: {username} **missed** the `{halfsuit}`! :thinking:";
                 if (team == "red") variables[Context.Guild].BlueScore++;
                 else variables[Context.Guild].RedScore++;
             }
@@ -477,12 +477,12 @@ namespace FishBot.Modules
             {
                 if (!variables[Context.Guild].Players.Contains(username))
                 {
-                    await ReplyAsync($":x: `{username}` is not a valid username! :x:");
+                    await ReplyAsync($":x: {username} is not a valid username! :x:");
                     return;
                 }
 
                 variables[Context.Guild].PlayerTurn = username;
-                await ReplyAsync($":weary: It is now `{username}`'s turn! :weary:");
+                await ReplyAsync($":weary: It is now {username}'s turn! :weary:");
                 variables[Context.Guild].NeedsDesignatedPlayer = false;
 
                 variables[Context.Guild].AlgebraicNotation += $"designate {username};";
@@ -490,7 +490,7 @@ namespace FishBot.Modules
                 if (CheckPlayerTurnHandEmpty())
                 {
                     await ReplyAsync(
-                        $":open_mouth: `{variables[Context.Guild].PlayerTurn}` is out of cards! Use the `.designate` command to select the next player! :open_mouth:");
+                        $":open_mouth: {variables[Context.Guild].PlayerTurn} is out of cards! Use the `.designate` command to select the next player! :open_mouth:");
                     variables[Context.Guild].NeedsDesignatedPlayer = true;
                 }
             }
@@ -504,7 +504,7 @@ namespace FishBot.Modules
         [Summary("Tells you the number of cards a player has")]
         public async Task CardCount(string username)
         {
-            await ReplyAsync($"`{username}` has **{variables[Context.Guild].PlayerCards[username].Count}** cards.");
+            await ReplyAsync($"{username} has **{variables[Context.Guild].PlayerCards[username].Count}** cards.");
         }
 
         [Command("reset")]
