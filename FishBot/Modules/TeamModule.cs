@@ -29,7 +29,7 @@ namespace FishBot.Modules
                 return;
             }
 
-            string username = Context.User.Username;
+            string username = Context.User.Mention;
 
             if (variables[Context.Guild].AuthorUsers.ContainsValue(Context.User))
             {
@@ -39,7 +39,7 @@ namespace FishBot.Modules
 
             if (variables[Context.Guild].TeamDict.ContainsKey(username))
             {
-                await ReplyAsync($"`{username}` is already in a team! They are in `{variables[Context.Guild].TeamDict[username]}`");
+                await ReplyAsync($"{username} is already in a team! They are in `{variables[Context.Guild].TeamDict[username]}`");
                 return;
             }
 
@@ -50,14 +50,14 @@ namespace FishBot.Modules
 
             variables[Context.Guild].AuthorUsers.Add(username, Context.User);
 
-            await ReplyAsync($"Added `{username}` to `{teamname}`");
+            await ReplyAsync($"Added {username} to `{teamname}`");
         }
 
         [Command("leave")]
         [Summary("Allows a player to leave a team")]
         public async Task Leave()
         {
-            string username = Context.User.Username;
+            string username = Context.User.Mention;
 
             if (variables[Context.Guild].GameInProgress)
             {
@@ -67,7 +67,7 @@ namespace FishBot.Modules
 
             if (!variables[Context.Guild].TeamDict.ContainsKey(username))
             {
-                await ReplyAsync($":x: `{username}` is not already on a team! Add them onto a team using \".team add USERNAME\" :x:");
+                await ReplyAsync($":x: {username} is not already on a team! :x:");
                 return;
             }
 
@@ -86,7 +86,7 @@ namespace FishBot.Modules
                     newAuthorUsers.Remove(user.Key); // unpair discord IUser to username
             variables[Context.Guild].AuthorUsers = new Dictionary<string, IUser>(newAuthorUsers);
 
-            await ReplyAsync($"Removed `{username}` from `{prevTeam}`");
+            await ReplyAsync($"Removed {username} from `{prevTeam}`");
         }
 
         [Command("list")]
@@ -124,7 +124,7 @@ namespace FishBot.Modules
             var players = variables[Context.Guild].TeamDict.Where(x => x.Value == teamname).ToList();
 
 
-            string output = players.Aggregate("", (current, t) => current + t.Key + $"\t (*{variables[Context.Guild].AuthorUsers[t.Key].Username}*)" + "\n");
+            string output = players.Aggregate("", (current, t) => current + t.Key + "\n");
 
             if (output != "")
             {
