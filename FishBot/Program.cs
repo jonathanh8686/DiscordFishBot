@@ -8,7 +8,7 @@ using Discord.WebSocket;
 
 namespace FishBot
 {
-    internal class Program
+    class Program
     {
         public static Dictionary<IGuild, DataStorage> variables = new Dictionary<IGuild, DataStorage>();
 

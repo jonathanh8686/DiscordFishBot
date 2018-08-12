@@ -29,7 +29,7 @@ namespace FishBot.Modules
                 return;
             }
 
-            string username = Context.User.Mention;
+            string username = Context.User.Id.ToString();
 
             if (variables[Context.Guild].AuthorUsers.ContainsValue(Context.User))
             {
@@ -39,7 +39,7 @@ namespace FishBot.Modules
 
             if (variables[Context.Guild].TeamDict.ContainsKey(username))
             {
-                await ReplyAsync($"{username} is already in a team! They are in `{variables[Context.Guild].TeamDict[username]}`");
+                await ReplyAsync($"<@{username}> is already in a team! They are in `{variables[Context.Guild].TeamDict[username]}`");
                 return;
             }
 
@@ -50,7 +50,7 @@ namespace FishBot.Modules
 
             variables[Context.Guild].AuthorUsers.Add(username, Context.User);
 
-            await ReplyAsync($"Added {username} to `{teamname}`");
+            await ReplyAsync($"Added <@{username}> to `{teamname}`");
         }
 
         [Command("leave")]
@@ -67,7 +67,7 @@ namespace FishBot.Modules
 
             if (!variables[Context.Guild].TeamDict.ContainsKey(username))
             {
-                await ReplyAsync($":x: {username} is not already on a team! :x:");
+                await ReplyAsync($":x: <@{username}> is not already on a team! :x:");
                 return;
             }
 
@@ -86,7 +86,7 @@ namespace FishBot.Modules
                     newAuthorUsers.Remove(user.Key); // unpair discord IUser to username
             variables[Context.Guild].AuthorUsers = new Dictionary<string, IUser>(newAuthorUsers);
 
-            await ReplyAsync($"Removed {username} from `{prevTeam}`");
+            await ReplyAsync($"Removed <@{username}> from `{prevTeam}`");
         }
 
         [Command("list")]

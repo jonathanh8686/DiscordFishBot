@@ -39,7 +39,7 @@ namespace FishBot
             }
         }
 
-        public static string CardNameAssetPath { get; } = "assets/CardNames.txt";
+        public static string CardNameAssetPath { get; } = "assets/CardNames.txt"; // useless
         public static string HalfSuitNameAssetPath { get; } = "assets/HalfSuitNames.txt";
 
         public static async Task DealCards(IGuild cguild)
@@ -83,7 +83,7 @@ namespace FishBot
                             "HTTP Error when deleting hand information"));
                     }
 
-                var builder = new EmbedBuilder {Title = $"{user.Key}'s hand"};
+                var builder = new EmbedBuilder {Title = "Your hand"};
                 var halfSuitCards = "\n";
                 var rawNames = "";
 

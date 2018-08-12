@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Metadata.Ecma335;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -108,7 +109,7 @@ namespace FishBot.Modules
             foreach (string player in variables[Context.Guild].Players) // make sure that each username is attached to a IUser
             {
                 if (variables[Context.Guild].AuthorUsers.ContainsKey(player)) continue;
-                await ReplyAsync($":x: {player} is not attached to a SocketUser! :x:");
+                await ReplyAsync($":x: <@{player}> is not attached to a SocketUser! :x:");
                 return;
             }
 
@@ -136,17 +137,20 @@ namespace FishBot.Modules
             variables[Context.Guild].PlayerTurn = variables[Context.Guild]
                 .Players[new Random().Next(variables[Context.Guild].Players.Count)]; // get random player to start
 
-            variables[Context.Guild].AlgebraicNotation += $"<{variables[Context.Guild].PlayerTurn}>"; // add first player to afn
+            variables[Context.Guild].AlgebraicNotation += $"<@{variables[Context.Guild].PlayerTurn}>"; // add first player to afn
 
             variables[Context.Guild].GameStart = true;
             await CardDealer.DealCards(Context.Guild);
-            await ReplyAsync($":game_die: It's {variables[Context.Guild].PlayerTurn}'s turn!");
+            await ReplyAsync($":game_die: It's <@{variables[Context.Guild].PlayerTurn}>'s turn!");
         }
 
         [Command("call")]
+        [Alias("ask")]
         [Summary("Allows a player to call a card from another")]
         public async Task Call(string target, string requestedCard)
         {
+            target = target.Replace("@", "").Replace("<", "").Replace(">", "").Replace("!", "");
+
             if (variables[Context.Guild].RedScore + variables[Context.Guild].BlueScore == 9)
             {
                 await ReplyAsync(
@@ -212,7 +216,7 @@ namespace FishBot.Modules
             var builder = new EmbedBuilder
             {
                 Title = "Call Result",
-                ImageUrl = "https://raw.githubusercontent.com/jonathanh8686/DiscordFishBot/master/FishBot/cards/" +
+                ImageUrl = "https://raw.githubusercontent.com/jonathanh8686/DiscordFishBot/master/cards/" +
                            req.CardName + ".png"
             };
 
@@ -227,13 +231,13 @@ namespace FishBot.Modules
 
             if (variables[Context.Guild].PlayerCards[variables[Context.Guild].PlayerTurn].Contains(req) || !hasHalfSuit) // player already has the card or they don't have something in the halfsuit
             {
-                variables[Context.Guild].AlgebraicNotation += $"call {target} {requestedCard} illegal;";
+                variables[Context.Guild].AlgebraicNotation += $"call <@{target}> {requestedCard} illegal;";
 
                 builder.Color = Color.Magenta;
                 builder.Description = ":oncoming_police_car: ILLEGAL CALL! :oncoming_police_car:";
 
                 builder.AddField("Info",
-                    $"{variables[Context.Guild].PlayerTurn} called the `{requestedCard}` from {target} but it was **illegal**!\n It is now {target}'s turn.");
+                    $"<@{variables[Context.Guild].PlayerTurn}> called the `{requestedCard}` from <@{target}> but it was **illegal**!\n It is now <@{target}>'s turn.");
                 variables[Context.Guild].PlayerTurn = target;
                 await ReplyAsync("*TEMPORARY*", false, builder.Build());
 
@@ -244,15 +248,15 @@ namespace FishBot.Modules
             if (variables[Context.Guild].PlayerCards[target].Contains(req))
             {
                 // hit
-                variables[Context.Guild].AlgebraicNotation += $"call {target} {requestedCard} hit;";
+                variables[Context.Guild].AlgebraicNotation += $"call <@{target}> {requestedCard} hit;";
 
                 builder.Color = Color.Green;
                 builder.Description = ":boom: Call was a hit! :boom:";
                 builder.ThumbnailUrl =
-                    "https://raw.githubusercontent.com/jonathanh8686/DiscordFishBot/master/FishBot/cards/hit.png";
+                    "https://raw.githubusercontent.com/jonathanh8686/DiscordFishBot/master/cards/hit.png";
 
                 builder.AddField("Info",
-                    $"{variables[Context.Guild].PlayerTurn} called the `{requestedCard}` from {target} and it was a **hit**!\n It is now {variables[Context.Guild].PlayerTurn}'s turn.");
+                    $"<@{variables[Context.Guild].PlayerTurn}> called the `{requestedCard}` from <@{target}> and it was a **hit**!\n It is now <@{variables[Context.Guild].PlayerTurn}>'s turn.");
 
                 variables[Context.Guild].PlayerCards[target].Remove(req);
                 variables[Context.Guild].PlayerCards[variables[Context.Guild].PlayerTurn].Add(req);
@@ -260,15 +264,15 @@ namespace FishBot.Modules
             else
             {
                 // miss
-                variables[Context.Guild].AlgebraicNotation += $"call {target} {requestedCard} miss;";
+                variables[Context.Guild].AlgebraicNotation += $"call <@{target}> {requestedCard} miss;";
 
                 builder.Color = Color.DarkRed;
                 builder.Description = ":thinking: Call was a miss! :thinking:";
                 builder.ThumbnailUrl =
-                    "https://raw.githubusercontent.com/jonathanh8686/DiscordFishBot/master/FishBot/cards/miss.png";
+                    "https://raw.githubusercontent.com/jonathanh8686/DiscordFishBot/master/cards/miss.png";
 
                 builder.AddField("Info",
-                    $"{variables[Context.Guild].PlayerTurn} called the `{requestedCard}` from {target} and it was a **miss**!\n It is now {target}'s turn.");
+                    $"<@{variables[Context.Guild].PlayerTurn}> called the `{requestedCard}` from <@{target}> and it was a **miss**!\n It is now <@{target}>'s turn.");
                 variables[Context.Guild].PlayerTurn = target;
             }
 
@@ -279,7 +283,7 @@ namespace FishBot.Modules
             if (CheckPlayerTurnHandEmpty())
             {
                 await ReplyAsync(
-                    $"{variables[Context.Guild].PlayerTurn} is out of cards! Use the `.designate` command to select the next player!");
+                    $"<@{variables[Context.Guild].PlayerTurn}> is out of cards! Use the `.designate` command to select the next player!");
                 variables[Context.Guild].NeedsDesignatedPlayer = true;
             }
         }
@@ -424,11 +428,15 @@ namespace FishBot.Modules
             else
             {
                 if (variables[Context.Guild].RedScore >= 5)
-                    await ReplyAsync(
-                        "Red Team has clinched the game!! Use `.reset` to stop the game now, or continue playing! Also you may view the AFN using the `.afn` command");
+                {
+                    await ReplyAsync("Red Team has clinched the game!! Use `.reset` to stop the game now, or continue playing! Also you may view the AFN using the `.afn` command");
+                    variables[Context.Guild].GameClinch = true;
+                }
                 else if (variables[Context.Guild].BlueScore >= 5)
-                    await ReplyAsync(
-                        "Blue Team has clinched the game!! Use `.reset` to stop the game now, or continue playing! Also you may view the AFN using the `.afn` command");
+                {
+                    await ReplyAsync("Blue Team has clinched the game!! Use `.reset` to stop the game now, or continue playing! Also you may view the AFN using the `.afn` command");
+                    variables[Context.Guild].GameClinch = true;
+                }
             }
 
             if (CheckPlayerTurnHandEmpty() && variables[Context.Guild].GameInProgress)
@@ -482,7 +490,7 @@ namespace FishBot.Modules
                 }
 
                 variables[Context.Guild].PlayerTurn = username;
-                await ReplyAsync($":weary: It is now {username}'s turn! :weary:");
+                await ReplyAsync($":weary: It is now <@{username}>'s turn! :weary:");
                 variables[Context.Guild].NeedsDesignatedPlayer = false;
 
                 variables[Context.Guild].AlgebraicNotation += $"designate {username};";
@@ -490,7 +498,7 @@ namespace FishBot.Modules
                 if (CheckPlayerTurnHandEmpty())
                 {
                     await ReplyAsync(
-                        $":open_mouth: {variables[Context.Guild].PlayerTurn} is out of cards! Use the `.designate` command to select the next player! :open_mouth:");
+                        $":open_mouth: <@{variables[Context.Guild].PlayerTurn}> is out of cards! Use the `.designate` command to select the next player! :open_mouth:");
                     variables[Context.Guild].NeedsDesignatedPlayer = true;
                 }
             }
@@ -504,7 +512,7 @@ namespace FishBot.Modules
         [Summary("Tells you the number of cards a player has")]
         public async Task CardCount(string username)
         {
-            await ReplyAsync($"{username} has **{variables[Context.Guild].PlayerCards[username].Count}** cards.");
+            await ReplyAsync($"<@{username}> has **{variables[Context.Guild].PlayerCards[username].Count}** cards.");
         }
 
         [Command("reset")]
@@ -551,7 +559,7 @@ namespace FishBot.Modules
                 ":checkered_flag: The game has ended! Use the `.reset` command to play again! Or use the `.afn` to view the algebraic notation :checkered_flag:");
         }
 
-        private bool CheckPlayerTurnHandEmpty()
+        private bool CheckPlayerTurnHandEmpty() // ?
         {
             return variables[Context.Guild].PlayerCards[variables[Context.Guild].PlayerTurn].Count == 0;
         }
