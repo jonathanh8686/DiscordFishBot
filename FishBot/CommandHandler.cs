@@ -23,9 +23,10 @@ namespace FishBot
             _client = c;
             _cmds = new CommandService();
 
+
             _services = new ServiceCollection().BuildServiceProvider();
 
-            await _cmds.AddModulesAsync(Assembly.GetEntryAssembly());
+            await _cmds.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
             _client.MessageReceived += HandleCommandAsync;
         }
 
@@ -38,8 +39,7 @@ namespace FishBot
 
             if (!Program.variables.ContainsKey(context.Guild))
             {
-                await context.Channel.SendMessageAsync(
-                    "Guild not recognized! **Tell Jonathan!!!!!**");
+                await context.Channel.SendMessageAsync("Guild not recognized! **Tell Jonathan!!!!!**");
                 return;
             }
 

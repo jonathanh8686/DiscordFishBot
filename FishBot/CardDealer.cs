@@ -131,7 +131,7 @@ namespace FishBot
                 }
 
                 Console.WriteLine(user.Key);
-                Console.WriteLine(rawNames);
+                Console.Write(rawNames + "   ");
 
                 if (halfSuitCards != "\n")
                     builder.AddField(HalfSuitNames[8], halfSuitCards);

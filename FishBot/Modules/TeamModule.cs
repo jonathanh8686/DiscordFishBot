@@ -57,7 +57,7 @@ namespace FishBot.Modules
         [Summary("Allows a player to leave a team")]
         public async Task Leave()
         {
-            string username = Context.User.Mention;
+            string username = Context.User.Id.ToString();
 
             if (variables[Context.Guild].GameInProgress)
             {
@@ -124,7 +124,7 @@ namespace FishBot.Modules
             var players = variables[Context.Guild].TeamDict.Where(x => x.Value == teamname).ToList();
 
 
-            string output = players.Aggregate("", (current, t) => current + t.Key + "\n");
+            string output = players.Aggregate("", (current, t) => current + $"<@{t.Key}>" + "\n");
 
             if (output != "")
             {

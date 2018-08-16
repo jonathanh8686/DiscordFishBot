@@ -9,13 +9,16 @@ namespace FishBot
         public Dictionary<string, IUser> AuthorUsers = new Dictionary<string, IUser>();
 
         public Dictionary<string, string> TeamDict = new Dictionary<string, string>();
+
         public int BlueScore;
+        public int BlueSurrenderVotes;
         public List<string> BlueTeam = new List<string>();
-        public int RedScore; // it's like it's getting worse
+        public int RedScore;
+        public int RedSurrenderVotes; // maybe add all this to another class
         public List<string> RedTeam = new List<string>();
 
-        public bool GameInProgress; // it's all gone to shit
-        public bool GameStart; // lol this is so disgusting
+        public bool GameInProgress;
+        public bool GameStart;
         public bool GameClinch;
         public bool NeedsDesignatedPlayer;
 
