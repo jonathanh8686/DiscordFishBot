@@ -231,6 +231,7 @@ namespace FishBot.Modules
 
             if (variables[Context.Guild].PlayerCards[variables[Context.Guild].PlayerTurn].Contains(req) || !hasHalfSuit) // player already has the card or they don't have something in the halfsuit
             {
+                await Context.Message.DeleteAsync();
                 return;
                 //variables[Context.Guild].AlgebraicNotation += $"call {target} {requestedCard} illegal;";
 
@@ -324,6 +325,7 @@ namespace FishBot.Modules
 
             var seperatedCallString = callstring.Split(" ");
             var claimedCards = new List<string>();
+            var allClaimed = new List<string>();
             var cuser = "";
             var authorName = "";
 
@@ -348,8 +350,7 @@ namespace FishBot.Modules
                 if (variables[Context.Guild].Players.Contains(editedSeg)) // if this part of the segStr is a player
                 {
                     foreach (string card in claimedCards)
-                        if (!variables[Context.Guild].PlayerCards[cuser]
-                            .Contains(CardDealer.GetCardByName(card.ToUpperInvariant())))
+                        if (!variables[Context.Guild].PlayerCards[cuser].Contains(CardDealer.GetCardByName(card.ToUpperInvariant())))
                             works = false;
                     cuser = editedSeg;
 
@@ -360,12 +361,15 @@ namespace FishBot.Modules
                         return;
                     }
 
-                    //claimedCards = new List<string>();
+                    claimedCards = new List<string>();
                 }
                 else
                 {
                     if (CardDealer.CardNames.Contains(editedSeg))
+                    {
                         claimedCards.Add(editedSeg);
+                        allClaimed.Add(editedSeg);
+                    }
                 }
             }
 
@@ -377,10 +381,10 @@ namespace FishBot.Modules
 
             int hsindex = CardDealer.HalfSuitNames.IndexOf(halfsuit);
 
-            foreach (string card in claimedCards)
+            foreach (string card in allClaimed)
             {
                 for (var i = 0; i < 6; i++)
-                    if (!claimedCards.Contains(CardDealer.CardNames[hsindex * 6 + i]))
+                    if (!allClaimed.Contains(CardDealer.CardNames[hsindex * 6 + i]))
                     {
                         await ReplyAsync(":x: Cards do not match up with the halfsuit :x: (you autist)");
                         return;
