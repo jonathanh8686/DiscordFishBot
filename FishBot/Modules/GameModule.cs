@@ -119,7 +119,7 @@ namespace FishBot.Modules
             //Create AFN header
             variables[Context.Guild].AlgebraicNotation += variables[Context.Guild].Players.Count;
             variables[Context.Guild].AlgebraicNotation += "{" + variables[Context.Guild].RedTeam.Count + "|";
-            variables[Context.Guild].AlgebraicNotation += variables[Context.Guild].BlueTeam.Count +"}";
+            variables[Context.Guild].AlgebraicNotation += variables[Context.Guild].BlueTeam.Count + "}";
             foreach (string redPlayer in variables[Context.Guild].RedTeam)
             {
                 variables[Context.Guild].AlgebraicNotation +=
@@ -405,7 +405,7 @@ namespace FishBot.Modules
             await CardDealer.SendCards(Context.Guild);
             string team = variables[Context.Guild].TeamDict[username];
 
-            var builder = new EmbedBuilder {Title = ":telephone_receiver: HalfSuit Call :telephone_receiver:" };
+            var builder = new EmbedBuilder { Title = ":telephone_receiver: HalfSuit Call :telephone_receiver:" };
 
             if (works)
             {
@@ -552,7 +552,7 @@ namespace FishBot.Modules
                 await ReplyAsync(":x: Cannot view AFN while game is in progress! :x:");
                 return;
             }
-           
+
             await ReplyAsync(variables[Context.Guild].AlgebraicNotation);
         }
 
@@ -584,8 +584,8 @@ namespace FishBot.Modules
 
             var builder = new EmbedBuilder { Title = "Game Result!" };
 
-            if (variables[Context.Guild].RedSurrenderVotes / (double) variables[Context.Guild].RedTeam.Count >=
-                2.0 / 3.0)
+            if (variables[Context.Guild].RedSurrenderVotes / (double)variables[Context.Guild].RedTeam.Count >=
+                4.0 / 5.0)
             {
                 await ReplyAsync($":flag_white: **Red Team has surrendered!** :flag_white:");
 
@@ -598,8 +598,8 @@ namespace FishBot.Modules
                 await ReplyAsync(
                     ":checkered_flag: The game has ended! Use the `.reset` command to play again! Or use the `.afn` to view the algebraic notation :checkered_flag:");
             }
-            else if (variables[Context.Guild].BlueSurrenderVotes / (double) variables[Context.Guild].BlueTeam.Count >=
-                     2.0 / 3.0)
+            else if (variables[Context.Guild].BlueSurrenderVotes / (double)variables[Context.Guild].BlueTeam.Count >=
+                     4.0 / 5.0)
             {
                 await ReplyAsync($":flag_white: **Blue Team has surrendered!** :flag_white:");
 
@@ -616,7 +616,7 @@ namespace FishBot.Modules
 
         private async Task DeclareResult()
         {
-            var builder = new EmbedBuilder {Title = "Game Result!"};
+            var builder = new EmbedBuilder { Title = "Game Result!" };
 
             if (variables[Context.Guild].RedScore > variables[Context.Guild].BlueScore)
             {
@@ -633,10 +633,9 @@ namespace FishBot.Modules
                 $"Blue Team: {variables[Context.Guild].BlueScore}\n Red Team: {variables[Context.Guild].RedScore}");
             await ReplyAsync("", false, builder.Build());
 
-            await ReplyAsync(
-                ":checkered_flag: The game has ended! Use the `.reset` command to play again! Or use the `.afn` to view the algebraic notation :checkered_flag:");
+            await ReplyAsync(":checkered_flag: The game has ended! Use the `.reset` command to play again! Or use the `.afn` to view the algebraic notation :checkered_flag:");
         }
-        
+
         private bool CheckPlayerTurnHandEmpty() // ?
         {
             return variables[Context.Guild].PlayerCards[variables[Context.Guild].PlayerTurn].Count == 0;
