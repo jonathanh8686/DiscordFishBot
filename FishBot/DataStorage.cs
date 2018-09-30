@@ -12,21 +12,26 @@ namespace FishBot
 
         public int BlueScore;
         public int BlueSurrenderVotes;
+        public List<string> BlueSurrenders = new List<string>();
+
         public List<string> BlueTeam = new List<string>();
         public int RedScore;
         public int RedSurrenderVotes; // maybe add all this to another class
+        public List<string> RedSurrenders = new List<string>();
+
         public List<string> RedTeam = new List<string>();
 
         public bool GameInProgress;
         public bool GameStart;
         public bool GameClinch;
         public bool NeedsDesignatedPlayer;
+        public string Designator = "";
 
         public Dictionary<string, List<Card>> PlayerCards = new Dictionary<string, List<Card>>();
         public List<string> Players = new List<string>();
         public string PlayerTurn;
 
-        public string AlgebraicNotation;
+        public string AlgebraicNotation = "";
 
 
     }

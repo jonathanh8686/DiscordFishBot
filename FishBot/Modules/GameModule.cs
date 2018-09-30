@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection.Metadata.Ecma335;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Discord;
@@ -117,19 +119,19 @@ namespace FishBot.Modules
             variables[Context.Guild].CalledHalfSuits.Clear();
 
             //Create AFN header
-            variables[Context.Guild].AlgebraicNotation += variables[Context.Guild].Players.Count;
-            variables[Context.Guild].AlgebraicNotation += "{" + variables[Context.Guild].RedTeam.Count + "|";
-            variables[Context.Guild].AlgebraicNotation += variables[Context.Guild].BlueTeam.Count + "}";
+            variables[Context.Guild].AlgebraicNotation += variables[Context.Guild].Players.Count + ";";
+            variables[Context.Guild].AlgebraicNotation += variables[Context.Guild].RedTeam.Count + ";";
+            variables[Context.Guild].AlgebraicNotation += variables[Context.Guild].BlueTeam.Count + ";";
             foreach (string redPlayer in variables[Context.Guild].RedTeam)
             {
                 variables[Context.Guild].AlgebraicNotation +=
-                    redPlayer + "[" + variables[Context.Guild].AuthorUsers[redPlayer] + "]";
+                    redPlayer + ":" + variables[Context.Guild].AuthorUsers[redPlayer] + ";";
             }
 
             foreach (string bluePlayer in variables[Context.Guild].BlueTeam)
             {
                 variables[Context.Guild].AlgebraicNotation +=
-                    bluePlayer + "[" + variables[Context.Guild].AuthorUsers[bluePlayer] + "]";
+                    bluePlayer + ":" + variables[Context.Guild].AuthorUsers[bluePlayer] + ";";
             }
 
             // Starting game
@@ -137,7 +139,7 @@ namespace FishBot.Modules
             variables[Context.Guild].PlayerTurn = variables[Context.Guild]
                 .Players[new Random().Next(variables[Context.Guild].Players.Count)]; // get random player to start
 
-            variables[Context.Guild].AlgebraicNotation += variables[Context.Guild].PlayerTurn; // add first player to afn
+            variables[Context.Guild].AlgebraicNotation += variables[Context.Guild].PlayerTurn + ";"; // add first player to afn
 
             variables[Context.Guild].GameStart = true;
             await CardDealer.DealCards(Context.Guild);
@@ -150,6 +152,7 @@ namespace FishBot.Modules
         public async Task Call(string target, string requestedCard)
         {
             target = target.Replace("@", "").Replace("<", "").Replace(">", "").Replace("!", "");
+            requestedCard = requestedCard.ToUpperInvariant();
 
             if (variables[Context.Guild].RedScore + variables[Context.Guild].BlueScore == 9)
             {
@@ -192,8 +195,7 @@ namespace FishBot.Modules
             // delete previous call info
             var rawMessages = Context.Channel.GetMessagesAsync().FlattenAsync();
             foreach (var msg in rawMessages.Result)
-                if (msg.Author.Id == Context.Client.CurrentUser.Id && msg.Content.Contains("*TEMPORARY*")
-                ) // everything marked with *TEMPORARY*
+                if (msg.Author.Id == Context.Client.CurrentUser.Id && msg.Content.Contains("*TEMPORARY*")) // everything marked with *TEMPORARY*
                     await msg.DeleteAsync();
 
             var req = CardDealer.GetCardByName(requestedCard.ToUpperInvariant());
@@ -229,6 +231,7 @@ namespace FishBot.Modules
                     .Contains(CardDealer.GetCardByName(CardDealer.CardNames[6 * hsIndex + i])))
                     hasHalfSuit = true;
 
+            // handing illegal moves
             if (variables[Context.Guild].PlayerCards[variables[Context.Guild].PlayerTurn].Contains(req) || !hasHalfSuit) // player already has the card or they don't have something in the halfsuit
             {
                 await Context.Message.DeleteAsync();
@@ -338,7 +341,6 @@ namespace FishBot.Modules
             {
                 string editedSeg = strSeg.Replace("@", "").Replace("<", "").Replace(">", "").Replace("!", "");
 
-                //TODO: Fix multiple people call not working
                 if (editedSeg == "") continue;
                 if (!CardDealer.CardNames.Contains(editedSeg) && !variables[Context.Guild].Players.Contains(editedSeg))
                 {
@@ -386,7 +388,7 @@ namespace FishBot.Modules
                 for (var i = 0; i < 6; i++)
                     if (!allClaimed.Contains(CardDealer.CardNames[hsindex * 6 + i]))
                     {
-                        await ReplyAsync(":x: Cards do not match up with the halfsuit :x: (you autist)");
+                        await ReplyAsync(":x: Cards do not match up with the halfsuit :x:");
                         return;
                     }
             }
@@ -433,7 +435,6 @@ namespace FishBot.Modules
             await ReplyAsync("", false, builder.Build());
             if (variables[Context.Guild].RedScore + variables[Context.Guild].BlueScore >= 9)
             {
-                variables[Context.Guild].GameInProgress = false;
                 await DeclareResult();
             }
             else
@@ -452,9 +453,9 @@ namespace FishBot.Modules
 
             if (CheckPlayerTurnHandEmpty() && variables[Context.Guild].GameInProgress)
             {
-                await ReplyAsync(
-                    $":open_mouth: {variables[Context.Guild].PlayerTurn} is out of cards! Use the `.designate` command to select the next player! :open_mouth:");
+                await ReplyAsync($":open_mouth: {variables[Context.Guild].PlayerTurn} is out of cards! Use the `.designate` command to select the next player! :open_mouth:");
                 variables[Context.Guild].NeedsDesignatedPlayer = true;
+                variables[Context.Guild].Designator = variables[Context.Guild].PlayerTurn.Replace("@", "").Replace("<", "").Replace(">", "").Replace("!", "");
             }
         }
 
@@ -494,7 +495,7 @@ namespace FishBot.Modules
                 return;
             }
 
-            if (variables[Context.Guild].NeedsDesignatedPlayer)
+            if (variables[Context.Guild].NeedsDesignatedPlayer && variables[Context.Guild].Designator == Context.Message.Author.Mention.Replace("@", "").Replace("<", "").Replace(">", "").Replace("!", ""))
             {
                 if (!variables[Context.Guild].Players.Contains(username))
                 {
@@ -510,8 +511,7 @@ namespace FishBot.Modules
 
                 if (CheckPlayerTurnHandEmpty())
                 {
-                    await ReplyAsync(
-                        $":open_mouth: <@{variables[Context.Guild].PlayerTurn}> is out of cards! Use the `.designate` command to select the next player! :open_mouth:");
+                    await ReplyAsync($":open_mouth: <@{variables[Context.Guild].PlayerTurn}> is out of cards! Use the `.designate` command to select the next player! :open_mouth:");
                     variables[Context.Guild].NeedsDesignatedPlayer = true;
                 }
             }
@@ -533,27 +533,15 @@ namespace FishBot.Modules
         [Summary("Resets the game")]
         public async Task Reset()
         {
+            string[] blackList = { "183403512468733953", "216800764927016960", "157998279760674817" };
+
+            if (blackList.Contains(Context.Message.Author.Id.ToString()))
+            {
+                await ReplyAsync(":hear_no_evil: :hear_no_evil: :hear_no_evil: ");
+            }
+
             variables[Context.Guild] = new DataStorage();
             await ReplyAsync(":gear: All variables reinitalized. :gear:");
-        }
-
-        [Command("afn")]
-        [Summary("Displays the AFN for the game")]
-        public async Task AFN()
-        {
-            if (!variables[Context.Guild].GameInProgress)
-            {
-                await ReplyAsync($":x: Game is not yet in progress! :x:");
-                return;
-            }
-
-            if (!variables[Context.Guild].GameClinch)
-            {
-                await ReplyAsync(":x: Cannot view AFN while game is in progress! :x:");
-                return;
-            }
-
-            await ReplyAsync(variables[Context.Guild].AlgebraicNotation);
         }
 
         [Command("surrender")]
@@ -567,17 +555,17 @@ namespace FishBot.Modules
                 return;
             }
 
-            if (variables[Context.Guild].TeamDict[Context.User.Id.ToString()] == "red")
+            if (variables[Context.Guild].TeamDict[Context.User.Id.ToString()] == "red" && !variables[Context.Guild].RedSurrenders.Contains(Context.User.Id.ToString()))
             {
+                variables[Context.Guild].RedSurrenders.Add(Context.User.Id.ToString());
                 variables[Context.Guild].RedSurrenderVotes++;
-                await ReplyAsync(
-                    $":flag_white: {Context.User.Mention} has voted to surrender! ({variables[Context.Guild].RedSurrenderVotes} / {variables[Context.Guild].RedTeam.Count}) :flag_white:");
+                await ReplyAsync($":flag_white: {Context.User.Mention} has voted to surrender! ({variables[Context.Guild].RedSurrenderVotes} / {variables[Context.Guild].RedTeam.Count}) :flag_white:");
             }
-            else if (variables[Context.Guild].TeamDict[Context.User.Id.ToString()] == "blue")
+            else if (variables[Context.Guild].TeamDict[Context.User.Id.ToString()] == "blue" && !variables[Context.Guild].BlueSurrenders.Contains(Context.User.Id.ToString()))
             {
+                variables[Context.Guild].BlueSurrenders.Add(Context.User.Id.ToString());
                 variables[Context.Guild].BlueSurrenderVotes++;
-                await ReplyAsync(
-                    $":flag_white: {Context.User.Mention} has voted to surrender! ({variables[Context.Guild].BlueSurrenderVotes} / {variables[Context.Guild].BlueTeam.Count}) :flag_white:");
+                await ReplyAsync($":flag_white: {Context.User.Mention} has voted to surrender! ({variables[Context.Guild].BlueSurrenderVotes} / {variables[Context.Guild].BlueTeam.Count}) :flag_white:");
             }
             else
                 await ReplyAsync(":x: Player not recognized on either team! :x:");
@@ -595,8 +583,13 @@ namespace FishBot.Modules
                     $"Blue Team: {variables[Context.Guild].BlueScore}\n Red Team: {variables[Context.Guild].RedScore}");
                 await ReplyAsync("", false, builder.Build());
 
-                await ReplyAsync(
-                    ":checkered_flag: The game has ended! Use the `.reset` command to play again! Or use the `.afn` to view the algebraic notation :checkered_flag:");
+                await ReplyAsync(":checkered_flag: The game has ended! Use the `.reset` command to play again! Or use the `.afn` to view the algebraic notation :checkered_flag:");
+
+                //StreamWriter sw = new StreamWriter("afn.txt", true, Encoding.UTF8);
+                //sw.Write(variables[Context.Guild].AlgebraicNotation);
+                //sw.Write("test afn");
+                //sw.Close();
+                File.WriteAllText(@"\home\jonathan\FishBot\data.afn", variables[Context.Guild].AlgebraicNotation);
             }
             else if (variables[Context.Guild].BlueSurrenderVotes / (double)variables[Context.Guild].BlueTeam.Count >=
                      4.0 / 5.0)
@@ -609,8 +602,8 @@ namespace FishBot.Modules
                     $"Blue Team: {variables[Context.Guild].BlueScore}\n Red Team: {variables[Context.Guild].RedScore}");
                 await ReplyAsync("", false, builder.Build());
 
-                await ReplyAsync(
-                    ":checkered_flag: The game has ended! Use the `.reset` command to play again! Or use the `.afn` to view the algebraic notation :checkered_flag:");
+                await ReplyAsync(":checkered_flag: The game has ended! Use the `.reset` command to play again! Or use the `.afn` to view the algebraic notation :checkered_flag:");
+                File.WriteAllText(@"\home\jonathan\FishBot\data.afn", variables[Context.Guild].AlgebraicNotation);
             }
         }
 
@@ -633,7 +626,9 @@ namespace FishBot.Modules
                 $"Blue Team: {variables[Context.Guild].BlueScore}\n Red Team: {variables[Context.Guild].RedScore}");
             await ReplyAsync("", false, builder.Build());
 
-            await ReplyAsync(":checkered_flag: The game has ended! Use the `.reset` command to play again! Or use the `.afn` to view the algebraic notation :checkered_flag:");
+            await ReplyAsync(":checkered_flag: The game has ended! Use the `.reset` command to play again! :checkered_flag:");
+            File.WriteAllText("/home/jonathan/FishBot/data.afn", variables[Context.Guild].AlgebraicNotation);
+
         }
 
         private bool CheckPlayerTurnHandEmpty() // ?
