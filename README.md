@@ -9,7 +9,7 @@ A simple (quickly put together) bot to allow *intellectuals* to play Canadian Fi
 `.help [command]` This command gives the details about a single command, an overview of all commands can be found by leaving the `[command]` field empty.
 
 ### Pre-Game Setup
-Use the team module to create teams. (As of now, teams do not need to be balanced - however this may lead to unforeseen bugs). Start all commands relating to team creation with the `.team` prefix.
+Use the team module to create teams. Start all commands relating to team creation with the `.team` prefix.
 
 #### Commands
 `.team join [team]` - **Allows a player to join a team**.
@@ -27,7 +27,7 @@ All cards are referred to by two identifiers, the value and suit. Most cards (ex
 Halfsuits are referred to as their suit and whether they are the high or low set. For example, the high spades is referred to as `S+` while the low spades are `S-`. Similarly, high and low diamonds are `D+` and `D-` respectively. **The only exception to this rule is the Jokers/Eight halfsuit. This halfsuit is referred to as `J8`**
 
 #### Commands
-`.start` - **Beings the game** After all players have joined a team and claimed a username, use this command to begin the game.
+`.start` - **Begins the game** After all players have joined a team, use this command to begin the game.
 
 `.call [username] [card name]` - **Allows a user to call a card from another user.** This command takes in a username and a card name. Card naming conventions are stated above.
 
@@ -37,6 +37,6 @@ Halfsuits are referred to as their suit and whether they are the high or low set
 
 `.cardcount [username]` - **Gives the number of cards a user has**
 
-`.designate [username]` - **Changes the turn to another player** In the case that you have run out of cards during your turn, you will be prompted to designate the next player. You may choose anyone in the game to continue.
+`.designate [username]` - **Changes the turn to another player** In the case that you have run out of cards during your turn, you will be prompted to designate the next player. You may choose anyone in the game to continue. *Note: In most variants of the rule, when a player is out of cards the turn should go to the player clockwise them, in this case, the convention is to designate the player below you on the team list*
 
 `.reset` - **Resets the entire game** Do not use during game unless you want to lose all data of the game. Should really only be used if the bot breaks (and it will I promise)
