@@ -135,5 +135,12 @@ namespace FishBot.Modules
                 await ReplyAsync($":pensive: There are no players on `{teamname}` :pensive:");
 
         }
+
+        [Command("list")]
+        public async Task List()
+        {
+            await List("red");
+            await List("blue");
+        }
     }
 }

@@ -288,6 +288,9 @@ namespace FishBot.Modules
             if (CheckPlayerTurnHandEmpty())
             {
                 await ReplyAsync(
+                    "not sure how this can ever get called but ill leave this here for a few games and see if this text ever shows up and if it doesn't i guess ill delete it xd");
+
+                await ReplyAsync(
                     $"<@{variables[Context.Guild].PlayerTurn}> is out of cards! Use the `.designate` command to select the next player!");
                 variables[Context.Guild].NeedsDesignatedPlayer = true;
             }
@@ -453,9 +456,26 @@ namespace FishBot.Modules
 
             if (CheckPlayerTurnHandEmpty() && variables[Context.Guild].GameInProgress)
             {
-                await ReplyAsync($":open_mouth: {variables[Context.Guild].PlayerTurn} is out of cards! Use the `.designate` command to select the next player! :open_mouth:");
-                variables[Context.Guild].NeedsDesignatedPlayer = true;
-                variables[Context.Guild].Designator = variables[Context.Guild].PlayerTurn.Replace("@", "").Replace("<", "").Replace(">", "").Replace("!", "");
+
+                string newPlayerID = "";
+                
+                if (variables[Context.Guild].TeamDict[variables[Context.Guild].PlayerTurn] == "red")
+                {
+                    // red team
+                    int playerIndex = variables[Context.Guild].RedTeam.FindIndex(a => a == variables[Context.Guild].PlayerTurn);
+                    newPlayerID = variables[Context.Guild].RedTeam[(playerIndex + 1) % variables[Context.Guild].RedTeam.Count];
+                }
+                else if (variables[Context.Guild].TeamDict[variables[Context.Guild].PlayerTurn] == "blue")
+                {
+                    // blue team
+                    int playerIndex = variables[Context.Guild].BlueTeam.FindIndex(a => a == variables[Context.Guild].PlayerTurn);
+                    newPlayerID = variables[Context.Guild].BlueTeam[(playerIndex + 1) % variables[Context.Guild].BlueTeam.Count];
+                }
+
+                await ReplyAsync($":open_mouth: <@{variables[Context.Guild].PlayerTurn}> is out of cards! Turn will move to <@{newPlayerID}> :open_mouth:");
+                //await ReplyAsync($":open_mouth: {variables[Context.Guild].PlayerTurn} is out of cards! Use the `.designate` command to select the next player! :open_mouth:");
+                //variables[Context.Guild].NeedsDesignatedPlayer = true;
+                //variables[Context.Guild].Designator = variables[Context.Guild].PlayerTurn.Replace("@", "").Replace("<", "").Replace(">", "").Replace("!", "");
             }
         }
 
@@ -529,6 +549,13 @@ namespace FishBot.Modules
             await ReplyAsync($"<@{username}> has **{variables[Context.Guild].PlayerCards[username].Count}** cards.");
         }
 
+        [Command("cardcount")]
+        public async Task CardCount()
+        {
+            foreach (var playerHand in variables[Context.Guild].PlayerCards)
+                await ReplyAsync($"<@{playerHand.Key}> has **{variables[Context.Guild].PlayerCards[playerHand.Key].Count}** cards.");
+        }
+
         [Command("reset")]
         [Summary("Resets the game")]
         public async Task Reset()
@@ -539,9 +566,11 @@ namespace FishBot.Modules
             {
                 await ReplyAsync(":hear_no_evil: :hear_no_evil: :hear_no_evil: ");
             }
-
-            variables[Context.Guild] = new DataStorage();
-            await ReplyAsync(":gear: All variables reinitalized. :gear:");
+            else
+            {
+                variables[Context.Guild] = new DataStorage();
+                await ReplyAsync(":gear: All variables reinitalized. :gear:");
+            }
         }
 
         [Command("surrender")]
@@ -572,8 +601,7 @@ namespace FishBot.Modules
 
             var builder = new EmbedBuilder { Title = "Game Result!" };
 
-            if (variables[Context.Guild].RedSurrenderVotes / (double)variables[Context.Guild].RedTeam.Count >=
-                4.0 / 5.0)
+            if (variables[Context.Guild].RedSurrenderVotes / (double)variables[Context.Guild].RedTeam.Count >= 4.0 / 5.0)
             {
                 await ReplyAsync($":flag_white: **Red Team has surrendered!** :flag_white:");
 
@@ -585,14 +613,9 @@ namespace FishBot.Modules
 
                 await ReplyAsync(":checkered_flag: The game has ended! Use the `.reset` command to play again! Or use the `.afn` to view the algebraic notation :checkered_flag:");
 
-                //StreamWriter sw = new StreamWriter("afn.txt", true, Encoding.UTF8);
-                //sw.Write(variables[Context.Guild].AlgebraicNotation);
-                //sw.Write("test afn");
-                //sw.Close();
-                File.WriteAllText(@"\home\jonathan\FishBot\data.afn", variables[Context.Guild].AlgebraicNotation);
+                File.WriteAllText("afn.txt", variables[Context.Guild].AlgebraicNotation);
             }
-            else if (variables[Context.Guild].BlueSurrenderVotes / (double)variables[Context.Guild].BlueTeam.Count >=
-                     4.0 / 5.0)
+            else if (variables[Context.Guild].BlueSurrenderVotes / (double)variables[Context.Guild].BlueTeam.Count >= 4.0 / 5.0)
             {
                 await ReplyAsync($":flag_white: **Blue Team has surrendered!** :flag_white:");
 
@@ -603,7 +626,7 @@ namespace FishBot.Modules
                 await ReplyAsync("", false, builder.Build());
 
                 await ReplyAsync(":checkered_flag: The game has ended! Use the `.reset` command to play again! Or use the `.afn` to view the algebraic notation :checkered_flag:");
-                File.WriteAllText(@"\home\jonathan\FishBot\data.afn", variables[Context.Guild].AlgebraicNotation);
+                File.WriteAllText("afn.txt", variables[Context.Guild].AlgebraicNotation);
             }
         }
 
@@ -627,7 +650,7 @@ namespace FishBot.Modules
             await ReplyAsync("", false, builder.Build());
 
             await ReplyAsync(":checkered_flag: The game has ended! Use the `.reset` command to play again! :checkered_flag:");
-            File.WriteAllText("/home/jonathan/FishBot/data.afn", variables[Context.Guild].AlgebraicNotation);
+            File.WriteAllText("afn.txt", variables[Context.Guild].AlgebraicNotation);
 
         }
 

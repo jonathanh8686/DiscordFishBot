@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -52,6 +53,42 @@ namespace FishBot.Modules
 
             await ReplyAsync("", false, builder.Build());
         }
+
+        ////lul
+        //[Command("purge")]
+        //public async Task purge()
+        //{
+        //    var messages = Context.Channel.GetMessagesAsync(500, CacheMode.AllowDownload, RequestOptions.Default).FlattenAsync();
+        //    foreach (var msg in messages.Result)
+        //    {
+        //           await msg.DeleteAsync();
+        //    }
+        //}
+
+        //[Command("changelog")]
+        //public async Task change()
+        //{
+        //    await Context.Message.DeleteAsync();
+
+        //    var builder = new EmbedBuilder
+        //    {
+        //        Title = "**New Changes!**",
+        //        Color = Color.Gold
+        //    };
+
+        //    builder.AddField("Designate Changes!",
+        //        "Designate automatically changes to the next player in line, so it better reflects actual gameplay!");
+
+        //    builder.AddField("`.team list` changes",
+        //        "Now using the `.team list` command with no team parameter will display both teams and their members.");
+
+        //    builder.AddField("`.cardcount` Changes!",
+        //        "Using the `.cardcount` command with no selected player will show all players and the number of cards in their hand.");
+
+        //    builder.AddField("Changelog Changes", "look at this cool changelog this took work");
+
+        //    await ReplyAsync("", false, builder.Build());
+        //}
 
         [Command("help")]
         public async Task HelpAsync(string command)
