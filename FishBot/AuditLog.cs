@@ -99,9 +99,7 @@ namespace FishBot
         private static async Task MessageUpdated(Cacheable<IMessage, ulong> before, SocketMessage after,
             ISocketMessageChannel channel)
         {
-            var message = await before.GetOrDownloadAsync() as SocketMessage;
-
-            if (message != null)
+            if (await before.GetOrDownloadAsync() is SocketMessage message)
             {
                 string outText = after.Author + ": \"" + message.Content + "\" => \"" + after.Content + "\"";
                 await Program.Log(new LogMessage(LogSeverity.Verbose, "", outText));
@@ -113,9 +111,7 @@ namespace FishBot
         private static async Task MessageDeleted(Cacheable<IMessage, ulong> msg,
             ISocketMessageChannel socketMessageChannel)
         {
-            var message = await msg.GetOrDownloadAsync() as SocketMessage;
-
-            if (message != null)
+            if (await msg.GetOrDownloadAsync() is SocketMessage message)
             {
                 string outText = message.Author + ": (-) \"" + message.Content + "\"";
                 await Program.Log(new LogMessage(LogSeverity.Verbose, "", outText));
@@ -130,10 +126,7 @@ namespace FishBot
 
         private static async Task UserUpdated(SocketUser socketUser, SocketUser user)
         {
-            var before = socketUser as SocketGuildUser;
-            var after = user as SocketGuildUser;
-
-            if (before != null && after != null)
+            if (socketUser is SocketGuildUser before && user is SocketGuildUser after)
                 if (before.Nickname != after.Nickname)
                 {
                     string outText = "User " + before.Username + " changed \"" + before.Nickname + "\" => \"" +

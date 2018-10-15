@@ -60,12 +60,15 @@ namespace FishBot
             await Task.Delay(-1);
         }
 
-        private async Task GuildAvailable(SocketGuild g)
+#pragma warning disable 1998
+        private static async Task GuildAvailable(SocketGuild g)
         {
             variables.Add(g, new DataStorage());
         }
 
-        private async Task JoinedGuild(SocketGuild g)
+
+        private static async Task JoinedGuild(SocketGuild g)
+#pragma warning restore 1998
         {
             variables.Add(g, new DataStorage());
         }

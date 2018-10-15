@@ -2,9 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection.Metadata.Ecma335;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -89,7 +86,7 @@ namespace FishBot.Modules
                 if (variables[Context.Guild].RedScore + variables[Context.Guild].BlueScore == 9)
                 {
                     await ReplyAsync(
-                        ":checkered_flag: The game has ended! Use the `.reset` command to play again! Or use the `.afn` to view the algebraic notation :checkered_flag:");
+                        ":checkered_flag: The game has ended! Use the `.reset` command to play again! :checkered_flag:");
                     return;
                 }
                 await ReplyAsync(":trophy: Game is already in progess! :trophy:");
@@ -157,7 +154,7 @@ namespace FishBot.Modules
             if (variables[Context.Guild].RedScore + variables[Context.Guild].BlueScore == 9)
             {
                 await ReplyAsync(
-                    ":checkered_flag: The game has ended! Use the `.reset` command to play again! Or use the `.afn` to view the algebraic notation :checkered_flag:");
+                    ":checkered_flag: The game has ended! Use the `.reset` command to play again! :checkered_flag:");
                 return;
             }
 
@@ -307,7 +304,7 @@ namespace FishBot.Modules
             if (variables[Context.Guild].RedScore + variables[Context.Guild].BlueScore == 9)
             {
                 await ReplyAsync(
-                    ":checkered_flag: The game has ended! Use the `.reset` command to play again! Or use the `.afn` to view the algebraic notation :checkered_flag:");
+                    ":checkered_flag: The game has ended! Use the `.reset` command to play again! :checkered_flag:");
                 return;
             }
 
@@ -386,7 +383,7 @@ namespace FishBot.Modules
 
             int hsindex = CardDealer.HalfSuitNames.IndexOf(halfsuit);
 
-            foreach (string card in allClaimed)
+            foreach (string _ in allClaimed)
             {
                 for (var i = 0; i < 6; i++)
                     if (!allClaimed.Contains(CardDealer.CardNames[hsindex * 6 + i]))
@@ -444,12 +441,12 @@ namespace FishBot.Modules
             {
                 if (variables[Context.Guild].RedScore >= 5)
                 {
-                    await ReplyAsync("Red Team has clinched the game!! Use `.reset` to stop the game now, or continue playing! Also you may view the AFN using the `.afn` command");
+                    await ReplyAsync("Red Team has clinched the game!! Use `.reset` to stop the game now, or continue playing!");
                     variables[Context.Guild].GameClinch = true;
                 }
                 else if (variables[Context.Guild].BlueScore >= 5)
                 {
-                    await ReplyAsync("Blue Team has clinched the game!! Use `.reset` to stop the game now, or continue playing! Also you may view the AFN using the `.afn` command");
+                    await ReplyAsync("Blue Team has clinched the game!! Use `.reset` to stop the game now, or continue playing!");
                     variables[Context.Guild].GameClinch = true;
                 }
             }
@@ -611,7 +608,7 @@ namespace FishBot.Modules
                     $"Blue Team: {variables[Context.Guild].BlueScore}\n Red Team: {variables[Context.Guild].RedScore}");
                 await ReplyAsync("", false, builder.Build());
 
-                await ReplyAsync(":checkered_flag: The game has ended! Use the `.reset` command to play again! Or use the `.afn` to view the algebraic notation :checkered_flag:");
+                await ReplyAsync(":checkered_flag: The game has ended! Use the `.reset` command to play again! :checkered_flag:");
 
                 File.WriteAllText("afn.txt", variables[Context.Guild].AlgebraicNotation);
             }
@@ -625,7 +622,7 @@ namespace FishBot.Modules
                     $"Blue Team: {variables[Context.Guild].BlueScore}\n Red Team: {variables[Context.Guild].RedScore}");
                 await ReplyAsync("", false, builder.Build());
 
-                await ReplyAsync(":checkered_flag: The game has ended! Use the `.reset` command to play again! Or use the `.afn` to view the algebraic notation :checkered_flag:");
+                await ReplyAsync(":checkered_flag: The game has ended! Use the `.reset` command to play again! :checkered_flag:");
                 File.WriteAllText("afn.txt", variables[Context.Guild].AlgebraicNotation);
             }
         }
