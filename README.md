@@ -2,7 +2,7 @@
 ### By: Jonathan Hsieh
 
 ## About
-A simple (quickly put together) bot to allow *intellectuals* to play Canadian Fish (Literature) on [Discord](https://discordapp.com/).  Bot is pretty shit so there are going to be tons of bugs and potentially game breaking ones. Tell me if you find any.
+A simple (quickly put together) bot to allow *intellectuals* to play Canadian Fish (Literature) on [Discord](https://discordapp.com/). Tell me if you find any bugs
 
 ## How to Use:
 ### Help Module
