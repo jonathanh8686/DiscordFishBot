@@ -143,8 +143,6 @@ namespace FishBot.Modules
             await ReplyAsync($":game_die: It's <@{variables[Context.Guild].PlayerTurn}>'s turn!");
         }
 
-
-
         [Command("score")]
         [Summary("Shows the current score")]
         public async Task Score()
@@ -211,6 +209,12 @@ namespace FishBot.Modules
         [Summary("Tells you the number of cards a player has")]
         public async Task CardCount(string username)
         {
+            if (!variables[Context.Guild].GameInProgress)
+            {
+                await ReplyAsync($":x: Game is not yet in progress! :x:");
+                return;
+            }
+
             username = username.Replace("@", "").Replace("<", "").Replace(">", "").Replace("!", "");
             await ReplyAsync($"<@{username}> has **{variables[Context.Guild].PlayerCards[username].Count}** cards.");
         }
@@ -218,15 +222,24 @@ namespace FishBot.Modules
         [Command("cardcount")]
         public async Task CardCount()
         {
+            if (!variables[Context.Guild].GameInProgress)
+            {
+                await ReplyAsync($":x: Game is not yet in progress! :x:");
+                return;
+            }
+
+            string ccString = "";
             foreach (var playerHand in variables[Context.Guild].PlayerCards)
-                await ReplyAsync($"<@{playerHand.Key}> has **{variables[Context.Guild].PlayerCards[playerHand.Key].Count}** cards.");
+                ccString += $"<@{playerHand.Key}> has **{variables[Context.Guild].PlayerCards[playerHand.Key].Count}** cards.\n";
+            await ReplyAsync(ccString);
+
         }
 
         [Command("reset")]
         [Summary("Resets the game")]
         public async Task Reset()
         {
-            string[] blackList = { "183403512468733953", "216800764927016960", "157998279760674817" };
+            string[] blackList = { "183403512468733953", "216800764927016960", "157998279760674817", "117458353839538181" };
 
             if (blackList.Contains(Context.Message.Author.Id.ToString()))
             {

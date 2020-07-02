@@ -46,10 +46,10 @@ namespace FishBot
             _client.GuildAvailable += GuildAvailable;
             _client.JoinedGuild += JoinedGuild;
 
+
+            // Allow problem to use Auditin
             _auditLog = new AuditLog();
             _auditLog.Mount(_client);
-
-            // Allow problem to use Auditing
 
             _cmdHandler = new CommandHandler();
             await _cmdHandler.InstallCommands(_client);
@@ -63,14 +63,16 @@ namespace FishBot
 #pragma warning disable 1998
         private static async Task GuildAvailable(SocketGuild g)
         {
-            variables.Add(g, new DataStorage());
+            if(!variables.Keys.Contains(g))
+                variables.Add(g, new DataStorage());
         }
 
 
         private static async Task JoinedGuild(SocketGuild g)
 #pragma warning restore 1998
         {
-            variables.Add(g, new DataStorage());
+            if (!variables.Keys.Contains(g))
+                variables.Add(g, new DataStorage());
         }
 
         /// <summary>
@@ -143,9 +145,7 @@ namespace FishBot
             int beginPosition = data.IndexOf(begin, StringComparison.Ordinal);
             if (beginPosition < 0) return "";
             int valueEnd = data.IndexOf(end, beginPosition + begin.Length, StringComparison.Ordinal);
-            if (valueEnd > beginPosition + begin.Length)
-                return data.Substring(beginPosition + begin.Length, valueEnd - beginPosition + begin.Length).Trim();
-            return "";
+            return valueEnd > beginPosition + begin.Length ? data.Substring(beginPosition + begin.Length, valueEnd - beginPosition + begin.Length).Trim() : "";
         }
 
         public static List<string> GetMiddleList(string data, string begin, string end)

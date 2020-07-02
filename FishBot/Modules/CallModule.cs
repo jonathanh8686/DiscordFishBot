@@ -343,23 +343,38 @@ namespace FishBot.Modules
 
             if (CheckPlayerTurnHandEmpty() && variables[Context.Guild].GameInProgress)
             {
-
-                string newPlayerID = "";
+                string newPlayerID = variables[Context.Guild].PlayerTurn;
 
                 if (variables[Context.Guild].TeamDict[variables[Context.Guild].PlayerTurn] == "red")
                 {
                     // red team
-                    int playerIndex = variables[Context.Guild].RedTeam.FindIndex(a => a == variables[Context.Guild].PlayerTurn);
-                    newPlayerID = variables[Context.Guild].RedTeam[(playerIndex + 1) % variables[Context.Guild].RedTeam.Count];
+                    int loopCount = 0;
+                    int playerIndex = variables[Context.Guild].RedTeam.FindIndex(a => a == newPlayerID);
+                    do
+                    {
+                       if (loopCount++ > variables[Context.Guild].BlueTeam.Count)
+                            break;
+                        playerIndex = variables[Context.Guild].RedTeam.FindIndex(a => a == newPlayerID);
+                        newPlayerID = variables[Context.Guild].RedTeam[(playerIndex + 1) % variables[Context.Guild].RedTeam.Count];
+                    } while (variables[Context.Guild].PlayerCards[newPlayerID].Count == 0);
                 }
                 else if (variables[Context.Guild].TeamDict[variables[Context.Guild].PlayerTurn] == "blue")
                 {
                     // blue team
-                    int playerIndex = variables[Context.Guild].BlueTeam.FindIndex(a => a == variables[Context.Guild].PlayerTurn);
-                    newPlayerID = variables[Context.Guild].BlueTeam[(playerIndex + 1) % variables[Context.Guild].BlueTeam.Count];
+                    int loopCount = 0;
+                    int playerIndex = variables[Context.Guild].BlueTeam.FindIndex(a => a == newPlayerID);
+                    do
+                    {
+                        if (loopCount++ > variables[Context.Guild].BlueTeam.Count)
+                            break;
+                        playerIndex = variables[Context.Guild].BlueTeam.FindIndex(a => a == newPlayerID);
+                        newPlayerID = variables[Context.Guild].BlueTeam[(playerIndex + 1) % variables[Context.Guild].BlueTeam.Count];
+                    } while (variables[Context.Guild].PlayerCards[newPlayerID].Count == 0);
+                    
                 }
 
                 await ReplyAsync($":open_mouth: <@{variables[Context.Guild].PlayerTurn}> is out of cards! Turn will move to <@{newPlayerID}> :open_mouth:");
+                variables[Context.Guild].PlayerTurn = newPlayerID;
                 //await ReplyAsync($":open_mouth: {variables[Context.Guild].PlayerTurn} is out of cards! Use the `.designate` command to select the next player! :open_mouth:");
                 //variables[Context.Guild].NeedsDesignatedPlayer = true;
                 //variables[Context.Guild].Designator = variables[Context.Guild].PlayerTurn.Replace("@", "").Replace("<", "").Replace(">", "").Replace("!", "");
